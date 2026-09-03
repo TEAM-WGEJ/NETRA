@@ -1,157 +1,262 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Globe from 'react-globe.gl';
+import * as THREE from 'three';
+import { Plus, Minus, RotateCcw } from 'lucide-react';
+
+const INITIAL_VIEW = { lat: 20, lng: 126, altitude: 2.2 };
+
+const iconButtonStyle: React.CSSProperties = {
+  width: '38px', height: '38px', background: '#fff', borderRadius: '50%',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.1)', border: 'none', cursor: 'pointer'
+};
 
 export default function App() {
   const globeEl = useRef<any>(null);
   const [selectedService, setSelectedService] = useState<any>(null);
+  const [countries, setCountries] = useState<any[]>([]);
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+
+  useEffect(() => {
+    const onResize = () => setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   useEffect(() => {
     if (globeEl.current) {
       globeEl.current.controls().autoRotate = true;
       globeEl.current.controls().autoRotateSpeed = 0.2;
-      globeEl.current.pointOfView({ lat: 20, lng: 0, altitude: 2.5 }, 1000);
+      globeEl.current.pointOfView(INITIAL_VIEW, 1000);
     }
   }, []);
 
-  // 지구본 공간 상에 펼쳐질 '추상적 데이터 관계망(Chain)' 노드 데이터
+  useEffect(() => {
+    fetch('/countries.geojson')
+      .then((res) => res.json())
+      .then((data) => setCountries(data.features))
+      .catch(() => setCountries([]));
+  }, []);
+
+  const globeMaterial = useMemo(() => {
+    return new THREE.MeshPhongMaterial({
+      color: '#bfe3ff',
+      transparent: true,
+      opacity: 0.92,
+      shininess: 80,
+    });
+  }, []);
+
+  const handleZoom = (delta: number) => {
+    if (!globeEl.current) return;
+    const pov = globeEl.current.pointOfView();
+    const altitude = Math.min(3.5, Math.max(1.0, pov.altitude + delta));
+    globeEl.current.pointOfView({ ...pov, altitude }, 400);
+  };
+
+  const handleResetView = () => {
+    globeEl.current?.pointOfView(INITIAL_VIEW, 800);
+  };
+
+  // 시안에 맞춘 서비스 및 3D 공간 노드 데이터
   const networkServices = [
     {
-      id: 'naver', name: '네이버', logo: 'N', color: '#03C75A',
-      desc: '포털 서비스 및 맞춤형 광고 개인정보 흐름',
-      // 지구본 위 특정 위치를 점령하는 게 아니라, 3D 구체 주변 공간에 고도를 주어 둥둥 띄움
+      id: 'naver', name: 'naver.com', korName: '네이버', logo: 'N', color: '#03C75A',
+      date: '2022. 03. 15', lastUse: '2024. 05. 20', retention: '2년 3개월', risk: '보통',
       nodes: [
-        { id: 'me', name: '나 (정보주체)', lat: 10, lng: 0, altitude: 0.1, type: '출발지', color: '#3b82f6' },
-        { id: 's1', name: '네이버 (1차 수집)', lat: 25, lng: 15, altitude: 0.3, type: '수집/이용', color: '#03C75A' },
-        { id: 's2', name: '네이버 클라우드', lat: 40, lng: 30, altitude: 0.5, type: '업무 위탁', color: '#10b981' },
-        { id: 's3', name: '외부 파트너사 외 3개', lat: 55, lng: 45, altitude: 0.7, type: '제3자 제공', color: '#f59e0b' }
+        { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' },
+        { id: 's1', name: '네이버', lat: 38.0, lng: 135.0, altitude: 0.25, logo: 'N', color: '#03C75A' },
+        { id: 's2', name: '네이버 클라우드', lat: 30.0, lng: 145.0, altitude: 0.45, logo: '☁️', color: '#0284c7' },
+        { id: 's3', name: '메가존 클라우드', lat: 20.0, lng: 155.0, altitude: 0.65, logo: 'M', color: '#6366f1' },
+        { id: 's4', name: '외부 파트너 외 3개', lat: 10.0, lng: 165.0, altitude: 0.85, logo: '⋯', color: '#64748b' }
       ],
       arcs: [
-        { startLat: 10, startLng: 0, endLat: 25, endLng: 15, color: '#03C75A', label: '수집' },
-        { startLat: 25, startLng: 15, endLat: 40, endLng: 30, color: '#10b981', label: '위탁' },
-        { startLat: 40, startLng: 30, endLat: 55, endLng: 45, color: '#f59e0b', label: '제공' }
+        { startLat: 37.5, startLng: 127.0, endLat: 38.0, endLng: 135.0, color: '#03C75A' },
+        { startLat: 38.0, startLng: 135.0, endLat: 30.0, endLng: 145.0, color: '#0284c7' },
+        { startLat: 30.0, startLng: 145.0, endLat: 20.0, endLng: 155.0, color: '#6366f1' },
+        { startLat: 20.0, startLng: 155.0, endLat: 10.0, endLng: 165.0, color: '#64748b' }
       ],
       chain: [
-        { level: 1, node: '나 (정보주체)', type: '출발지', detail: 'ID, 연락처, 검색 키워드 수집' },
-        { level: 2, node: '네이버', type: '1차 수집/이용', detail: '서비스 운영 및 타겟 마케팅 활용' },
-        { level: 3, node: '네이버 클라우드', type: '업무 위탁', detail: '인프라 구축 및 서버 스토리지 관리' },
-        { level: 4, node: '외부 파트너사 외 3개', type: '제3자 제공', detail: '통계 분석 및 광고 연동' }
+        { node: '나', type: '정보주체', desc: '최초 제공 (ID, 연락처)' },
+        { node: '네이버', type: '1차 수집', desc: '서비스 운영 및 타겟 광고' },
+        { node: '네이버 클라우드', type: '위탁', desc: '인프라 및 서버 스토리지' },
+        { node: '메가존 클라우드', type: '재위탁', desc: '데이터 관리 파트너' },
+        { node: '외 3개', type: '제3자', desc: '통계 분석 및 마케팅 연동' }
       ]
     },
     {
-      id: 'temu', name: '테무 (Temu)', logo: '🛒', color: '#FF6600',
-      desc: '해외 직구 플랫폼 대규모 국외 이전 및 위탁 구조',
+      id: 'temu', name: 'temu.com', korName: '테무', logo: '🛒', color: '#FF6600',
+      date: '2024. 01. 15', lastUse: '2024. 05. 22', retention: '탈퇴 시까지', risk: '높음',
       nodes: [
-        { id: 'me', name: '나 (정보주체)', lat: -10, lng: 0, altitude: 0.1, type: '출발지', color: '#3b82f6' },
-        { id: 's1', name: 'PDD Holdings', lat: -25, lng: -15, altitude: 0.3, type: '국외이전', color: '#FF6600' },
-        { id: 's2', name: '중국 협력 물류사', lat: -40, lng: -30, altitude: 0.5, type: '제3자 제공', color: '#ef4444' },
-        { id: 's3', name: '글로벌 타겟 광고망', lat: -55, lng: -45, altitude: 0.7, type: '제3자 제공', color: '#dc2626' }
+        { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' },
+        { id: 's1', name: 'PDD Holdings', lat: 31.2, lng: 121.4, altitude: 0.3, logo: '🛒', color: '#FF6600' },
+        { id: 's2', name: '중국 물류사', lat: 25.0, lng: 115.0, altitude: 0.5, logo: '📦', color: '#ef4444' },
+        { id: 's3', name: '광고 네트워크', lat: 18.0, lng: 105.0, altitude: 0.7, logo: '📢', color: '#dc2626' }
       ],
       arcs: [
-        { startLat: -10, startLng: 0, endLat: -25, endLng: -15, color: '#FF6600', label: '이전' },
-        { startLat: -25, startLng: -15, endLat: -40, endLng: -30, color: '#ef4444', label: '물류위탁' },
-        { startLat: -40, startLng: -30, endLat: -55, endLng: -45, color: '#dc2626', label: '광고제공' }
+        { startLat: 37.5, startLng: 127.0, endLat: 31.2, endLng: 121.4, color: '#FF6600' },
+        { startLat: 31.2, startLng: 121.4, endLat: 25.0, endLng: 115.0, color: '#ef4444' },
+        { startLat: 25.0, startLng: 115.0, endLat: 18.0, endLng: 105.0, color: '#dc2626' }
       ],
       chain: [
-        { level: 1, node: '나 (정보주체)', type: '출발지', detail: '배송지 주소, 결제 카드, 기기 식별자' },
-        { level: 2, node: 'PDD Holdings', type: '1차 수집/국외이전', detail: '상하이 본사 서버로 실시간 데이터 전송' },
-        { level: 3, node: '중국 협력 물류사', type: '제3자 제공', detail: '현지 통관 및 배송 목적의 정보 공유' },
-        { level: 4, node: '글로벌 타겟 광고망', type: '제3자 제공', detail: '행태정보 기반 쇼핑 관심사 수집' }
+        { node: '나', type: '정보주체', desc: '배송지 주소, 카드 정보' },
+        { node: 'PDD Holdings', type: '국외이전', desc: '상하이 본사 서버 전송' },
+        { node: '중국 물류사', type: '제3자', desc: '현지 통관 및 배송 공유' },
+        { node: '광고 네트워크', type: '제3자', desc: '행태정보 수집' }
       ]
     }
   ];
 
-  // 선택된 서비스가 없으면 전체 서비스 대표 아이콘들을 지구본에 띄움
+  // 메인 화면에 띄울 기본 아이콘들 (네이버, 인스타, 테무 등 시안 느낌)
   const activeElements = selectedService ? selectedService.nodes : [
-    { id: 'naver', name: '네이버', lat: 25, lng: 15, altitude: 0.3, color: '#03C75A', logo: 'N' },
-    { id: 'temu', name: '테무 (Temu)', lat: -25, lng: -15, altitude: 0.3, color: '#FF6600', logo: '🛒' }
+    { id: 'naver', name: '네이버', lat: 37.5, lng: 129.0, altitude: 0.2, logo: 'N', color: '#03C75A' },
+    { id: 'insta', name: '인스타그램', lat: 25.0, lng: 110.0, altitude: 0.3, logo: '📷', color: '#E1306C' },
+    { id: 'temu', name: '테무', lat: 45.0, lng: 140.0, altitude: 0.25, logo: '🛒', color: '#FF6600' },
+    { id: 'cloud', name: '클라우드', lat: 15.0, lng: 135.0, altitude: 0.35, logo: '☁️', color: '#0284c7' }
   ];
 
-  const activeArcs = selectedService ? selectedService.arcs : [];
+  const defaultArcs = activeElements.slice(0, -1).map((node: any, idx: number) => ({
+    startLat: node.lat, startLng: node.lng,
+    endLat: activeElements[idx + 1].lat, endLng: activeElements[idx + 1].lng,
+    color: 'rgba(148,163,184,0.4)'
+  }));
+
+  const activeArcs = selectedService ? selectedService.arcs : defaultArcs;
 
   return (
-    <div style={{ width: '100vw', height: '100vh', backgroundColor: '#090d16', color: '#f8fafc', margin: 0, overflow: 'hidden', fontFamily: 'sans-serif', position: 'relative' }}>
+    <div style={{ width: '100vw', height: '100vh', backgroundColor: '#f4f6f9', color: '#1e293b', margin: 0, overflow: 'hidden', fontFamily: 'sans-serif', position: 'relative' }}>
       
-      {/* 상단 타이틀 */}
-      <div style={{ position: 'absolute', top: '30px', left: '30px', zIndex: 10, pointerEvents: 'none' }}>
-        <p style={{ margin: '0 0 5px 0', fontSize: '12px', fontWeight: 'bold', color: '#38bdf8', letterSpacing: '1px' }}>ABSTRACT PRIVACY GLOBE</p>
-        <h1 style={{ margin: '0 0 8px 0', fontSize: '22px', color: '#ffffff' }}>지구본 공간 기반 추상적 데이터 관계망</h1>
-        <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8' }}>
-          {selectedService ? `"${selectedService.name}"의 3D 연쇄 관계망 체인 전개 중` : '서비스를 클릭하여 지구본 공간 상에 추상적 네트워크를 펼쳐보세요.'}
-        </p>
+      {/* 상단 헤더 영역 */}
+      <div style={{ position: 'absolute', top: '24px', left: '32px', right: '32px', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pointerEvents: 'none' }}>
+        <div>
+          <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#2563eb', letterSpacing: '1.5px' }}>PRIVACY GLOBE</span>
+          <h1 style={{ margin: '4px 0 6px 0', fontSize: '22px', color: '#0f172a', fontWeight: '800' }}>당신의 개인정보, 어디로 흘러가고 있을까요?</h1>
+          <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>3D 지구본에서 연결된 서비스를 탐색해보세요.</p>
+        </div>
+        <div style={{ display: 'flex', gap: '10px', pointerEvents: 'auto' }}>
+          <div style={{ width: '38px', height: '38px', background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', cursor: 'pointer' }}>🔔</div>
+          <div style={{ width: '38px', height: '38px', background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', cursor: 'pointer' }}>☰</div>
+        </div>
       </div>
 
-      {/* 하단 제어 및 초기화 버튼 */}
+      {/* 좌측 하단 요약 카드 (시안 하단 스타일) */}
       <div style={{
-        position: 'absolute', bottom: '25px', left: '50%', transform: 'translateX(-50%)', zIndex: 10,
-        background: 'rgba(30, 41, 59, 0.8)', padding: '10px 25px', borderRadius: '30px',
-        boxShadow: '0 10px 25px rgba(0,0,0,0.5)', display: 'flex', gap: '20px', border: '1px solid #334155', alignItems: 'center', backdropFilter: 'blur(5px)'
+        position: 'absolute', bottom: '90px', left: '32px', zIndex: 10, pointerEvents: 'none',
+        background: '#ffffff', padding: '16px 24px', borderRadius: '20px',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.08)', display: 'flex', gap: '24px', border: '1px solid #e2e8f0'
       }}>
-        <span style={{ fontSize: '12px', color: '#cbd5e1' }}>🌐 3D 추상 공간 모드</span>
-        {selectedService && (
-          <button 
-            onClick={() => setSelectedService(null)}
-            style={{ background: '#38bdf8', border: 'none', padding: '6px 14px', borderRadius: '20px', fontSize: '12px', cursor: 'pointer', fontWeight: 'bold', color: '#090d16' }}
-          >
-            지구본 초기화
-          </button>
-        )}
+        <div>
+          <p style={{ margin: '0 0 4px 0', fontSize: '11px', color: '#64748b', fontWeight: 'bold' }}>연결된 서비스</p>
+          <p style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>27 개</p>
+        </div>
+        <div style={{ width: '1px', background: '#e2e8f0' }} />
+        <div>
+          <p style={{ margin: '0 0 4px 0', fontSize: '11px', color: '#64748b', fontWeight: 'bold' }}>전송 중인 정보</p>
+          <p style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#2563eb' }}>142 건</p>
+        </div>
       </div>
 
-      {/* 3D 지구본 (배경은 구체 형태이되, 위에는 추상적 노드와 아크선만 공중에 떠 있음) */}
+      {/* 하단 네비게이션 바 (시안 하단 탭 스타일) */}
+      <div style={{
+        position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 10,
+        background: '#ffffff', padding: '10px 30px', borderRadius: '35px',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.08)', display: 'flex', gap: '40px', border: '1px solid #e2e8f0', alignItems: 'center'
+      }}>
+        <div onClick={() => setSelectedService(null)} style={{ textAlign: 'center', cursor: 'pointer', color: selectedService ? '#94a3b8' : '#2563eb' }}>
+          <div style={{ fontSize: '16px' }}>🌍</div>
+          <span style={{ fontSize: '10px', fontWeight: 'bold' }}>지구본</span>
+        </div>
+        <div style={{ textAlign: 'center', cursor: 'pointer', color: '#94a3b8' }}>
+          <div style={{ fontSize: '16px' }}>🔗</div>
+          <span style={{ fontSize: '10px', fontWeight: 'bold' }}>관계망</span>
+        </div>
+        <div style={{ textAlign: 'center', cursor: 'pointer', color: '#94a3b8' }}>
+          <div style={{ fontSize: '16px' }}>📊</div>
+          <span style={{ fontSize: '10px', fontWeight: 'bold' }}>정보 흐름</span>
+        </div>
+        <div style={{ textAlign: 'center', cursor: 'pointer', color: '#94a3b8' }}>
+          <div style={{ fontSize: '16px' }}>👤</div>
+          <span style={{ fontSize: '10px', fontWeight: 'bold' }}>내 활동</span>
+        </div>
+      </div>
+
+      {/* 지구본 아래 은은한 글로우/그림자 */}
+      <div style={{
+        position: 'absolute', top: '54%', left: '50%', transform: 'translate(-50%, -50%)',
+        width: '520px', height: '520px', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(37,99,235,0.16) 0%, rgba(37,99,235,0) 70%)',
+        filter: 'blur(40px)', zIndex: 0, pointerEvents: 'none'
+      }} />
+
+      {/* 3D 지구본 (레퍼런스 시안과 같은 광택 있는 하늘색 유리구슬 + 반투명 대륙 스타일) */}
       <Globe
         ref={globeEl}
-        globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-        backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
-        
+        width={windowSize.width}
+        height={windowSize.height}
+        globeMaterial={globeMaterial}
+        backgroundColor="rgba(0,0,0,0)"
+        showAtmosphere={true}
+        atmosphereColor="#8ec9f5"
+        atmosphereAltitude={0.18}
+
+        polygonsData={countries}
+        polygonCapColor={() => 'rgba(255,255,255,0.35)'}
+        polygonSideColor={() => 'rgba(255,255,255,0.12)'}
+        polygonStrokeColor={() => 'rgba(255,255,255,0.6)'}
+        polygonAltitude={0.006}
+
         htmlElementsData={activeElements}
         htmlLat="lat"
         htmlLng="lng"
-        htmlAltitude={(d: any) => d.altitude || 0.3}
+        htmlAltitude={(d: any) => d.altitude || 0.25}
         htmlElement={(d: any) => {
           const el = document.createElement('div');
           el.style.pointerEvents = 'auto';
           el.style.cursor = 'pointer';
 
-          const bgCol = d.color || '#3b82f6';
-          const txt = d.logo || d.name[0];
+          const bgCol = d.color || '#2563eb';
+          const txt = d.logo || 'N';
           const displayName = d.name;
 
+          el.title = displayName;
           el.innerHTML = `
             <div style="
-              display: flex; 
-              align-items: center; 
-              gap: 8px; 
-              background: rgba(15, 23, 42, 0.9); 
-              padding: 6px 14px 6px 6px; 
-              border-radius: 20px; 
-              box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
-              border: 2px solid ${bgCol};
+              width: 46px;
+              height: 46px;
+              background: #ffffff;
+              border-radius: 14px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              box-shadow: 0 8px 20px rgba(15,23,42,0.15);
+              border: 1px solid rgba(226,232,240,0.9);
               pointer-events: auto;
-              backdrop-filter: blur(4px);
+              transition: transform 0.2s;
             ">
               <div style="
-                width: 28px; 
-                height: 28px; 
-                background: ${bgCol}; 
-                color: #fff; 
-                border-radius: 50%; 
-                display: flex; 
-                align-items: center; 
-                justify-content: center; 
-                font-weight: bold; 
+                width: 28px;
+                height: 28px;
+                background: ${bgCol};
+                color: #fff;
+                border-radius: 9px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
                 font-size: 12px;
               ">
                 ${txt}
               </div>
-              <span style="font-size: 12px; font-weight: bold; color: #ffffff; white-space: nowrap;">${displayName}</span>
             </div>
           `;
 
           el.onclick = (e) => {
             e.stopPropagation();
             if (!selectedService) {
-              const found = networkServices.find(s => s.id === d.id);
+              // 네이버나 테무 클릭 시 해당 체인으로 전환
+              const found = networkServices.find(s => s.id === d.id || s.name.includes(d.name));
               if (found) setSelectedService(found);
+              else setSelectedService(networkServices[0]); // 기본은 네이버로 연결
             }
           };
 
@@ -160,67 +265,106 @@ export default function App() {
 
         arcsData={activeArcs}
         arcColor="color"
-        arcDashLength={0.4}
-        arcDashGap={0.2}
-        arcDashAnimateTime={1200}
-        arcStroke={2}
+        arcDashLength={0.3}
+        arcDashGap={0.35}
+        arcDashAnimateTime={1500}
+        arcStroke={1.5}
       />
 
-      {/* 우측 상세 패널 (선택 시 추상적 관계망 체인 표시) */}
+      {/* 지구본 우측 줌/리셋 컨트롤 */}
+      <div style={{
+        position: 'absolute', top: '50%', right: '24px', transform: 'translateY(-50%)', zIndex: 10,
+        display: 'flex', flexDirection: 'column', gap: '10px'
+      }}>
+        <button onClick={() => handleZoom(-0.4)} style={iconButtonStyle}><Plus size={16} color="#334155" /></button>
+        <button onClick={() => handleZoom(0.4)} style={iconButtonStyle}><Minus size={16} color="#334155" /></button>
+        <button onClick={handleResetView} style={iconButtonStyle}><RotateCcw size={14} color="#334155" /></button>
+      </div>
+
+      {/* 우측 상세 정보 패널 (시안의 우측 카드 스타일 완벽 재현) */}
       {selectedService && (
         <div style={{
-          position: 'absolute', top: '20px', right: '20px', bottom: '20px', width: '400px',
-          background: 'rgba(15, 23, 42, 0.95)', color: '#f8fafc', zIndex: 30, borderRadius: '24px', 
-          boxShadow: '-10px 0 40px rgba(0,0,0,0.5)', padding: '24px', boxSizing: 'border-box', 
+          position: 'absolute', top: '24px', right: '24px', bottom: '24px', width: '440px',
+          background: '#ffffff', color: '#0f172a', zIndex: 30, borderRadius: '28px', 
+          boxShadow: '-15px 0 50px rgba(0,0,0,0.12)', padding: '28px', boxSizing: 'border-box', 
           display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-          border: '1px solid #334155', backdropFilter: 'blur(10px)', overflowY: 'auto'
+          border: '1px solid #e2e8f0', overflowY: 'auto'
         }}>
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #334155', paddingBottom: '15px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '36px', height: '36px', background: selectedService.color, color: '#fff', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+            {/* 상단 닫기 및 서비스 헤더 */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '42px', height: '42px', background: selectedService.color, color: '#fff', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '18px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
                   {selectedService.logo}
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '16px', color: '#fff' }}>{selectedService.name}</h3>
-                  <span style={{ fontSize: '11px', color: '#38bdf8' }}>추상적 3D 관계망 체인 전개됨</span>
+                  <h3 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: '800' }}>{selectedService.korName}</h3>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>{selectedService.name}</span>
                 </div>
               </div>
-              <button onClick={() => setSelectedService(null)} style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#94a3b8' }}>✕</button>
+              <button onClick={() => setSelectedService(null)} style={{ background: '#f1f5f9', border: 'none', width: '32px', height: '32px', borderRadius: '50%', fontSize: '14px', cursor: 'pointer', color: '#64748b', fontWeight: 'bold' }}>✕</button>
             </div>
 
-            <h4 style={{ fontSize: '14px', color: '#38bdf8', marginBottom: '14px' }}>⛓️ 연쇄 데이터 흐름 구조</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
-              {selectedService.chain.map((item: any, idx: number) => (
-                <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', position: 'relative' }}>
-                  {idx < selectedService.chain.length - 1 && (
-                    <div style={{ position: 'absolute', top: '24px', left: '11px', width: '2px', height: 'calc(100% + 12px)', background: '#38bdf844' }} />
-                  )}
-                  <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#38bdf8', color: '#090d16', fontSize: '11px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, flexShrink: 0 }}>
-                    {item.level}
-                  </div>
-                  <div style={{ background: '#1e293b', border: '1px solid #334155', padding: '12px 16px', borderRadius: '12px', flexGrow: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#fff' }}>{item.node}</span>
-                      <span style={{ fontSize: '10px', background: '#090d16', color: '#38bdf8', padding: '2px 6px', borderRadius: '4px', border: '1px solid #334155' }}>{item.type}</span>
+            {/* 탭 메뉴 (개요 / 전송 정보 / 관계 서비스) */}
+            <div style={{ display: 'flex', gap: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px', marginBottom: '20px', fontSize: '13px', fontWeight: 'bold' }}>
+              <span style={{ color: '#2563eb', borderBottom: '2px solid #2563eb', paddingBottom: '12px', marginBottom: '-13px' }}>개요</span>
+              <span style={{ color: '#94a3b8', cursor: 'pointer' }}>전송 정보</span>
+              <span style={{ color: '#94a3b8', cursor: 'pointer' }}>관계 서비스</span>
+              <span style={{ color: '#94a3b8', cursor: 'pointer' }}>내 활동</span>
+            </div>
+
+            {/* 서비스 정보 박스 */}
+            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '20px', border: '1px solid #e2e8f0', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
+                <div><span style={{ color: '#64748b', marginRight: '10px' }}>가입일</span><span style={{ fontWeight: 'bold', color: '#0f172a' }}>{selectedService.date}</span></div>
+                <div><span style={{ color: '#64748b', marginRight: '10px' }}>최근 이용</span><span style={{ fontWeight: 'bold', color: '#0f172a' }}>{selectedService.lastUse}</span></div>
+                <div><span style={{ color: '#64748b', marginRight: '10px' }}>보유 기간</span><span style={{ fontWeight: 'bold', color: '#0f172a' }}>{selectedService.retention}</span></div>
+              </div>
+              <div style={{ textAlign: 'center', background: '#fff', padding: '10px 16px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                <span style={{ fontSize: '10px', color: '#64748b', display: 'block', marginBottom: '2px' }}>노출 수준</span>
+                <span style={{ fontSize: '14px', fontWeight: '800', color: selectedService.risk === '높음' ? '#dc2626' : '#2563eb' }}>{selectedService.risk}</span>
+              </div>
+            </div>
+
+            {/* 연결된 관계망 (시안의 흐름도 구조) */}
+            <h4 style={{ fontSize: '14px', color: '#0f172a', marginBottom: '14px', fontWeight: '800' }}>연결된 관계망</h4>
+            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '20px', border: '1px solid #e2e8f0', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', overflowX: 'auto' }}>
+              {selectedService.chain.map((c: any, idx: number) => (
+                <React.Fragment key={idx}>
+                  <div style={{ textAlign: 'center', minWidth: '55px' }}>
+                    <div style={{ width: '32px', height: '32px', background: idx === 0 ? '#3b82f6' : '#fff', color: idx === 0 ? '#fff' : '#0f172a', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 4px auto', fontSize: '12px', fontWeight: 'bold', border: '1px solid #cbd5e1', boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
+                      {idx === 0 ? '👤' : c.node[0]}
                     </div>
-                    <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8' }}>{item.detail}</p>
+                    <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#334155', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.node}</span>
                   </div>
+                  {idx < selectedService.chain.length - 1 && <span style={{ color: '#cbd5e1', fontSize: '14px' }}>→</span>}
+                </React.Fragment>
+              ))}
+            </div>
+
+            {/* 상세 설명 리스트 */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {selectedService.chain.map((c: any, idx: number) => (
+                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', padding: '8px 12px', background: '#f8fafc', borderRadius: '10px' }}>
+                  <span style={{ fontWeight: 'bold', color: '#334155' }}>{c.node} ({c.type})</span>
+                  <span style={{ color: '#64748b' }}>{c.desc}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <button 
-            onClick={() => alert('해당 관계망 전체 동의 일괄 철회 요청 완료')}
-            style={{
-              width: '100%', background: '#ef4444', color: '#ffffff', border: 'none',
-              padding: '14px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', fontSize: '14px',
-              boxShadow: '0 4px 20px rgba(239, 68, 68, 0.3)'
-            }}
-          >
-            관계망 내 데이터 제공 동의 일괄 철회 ↗
-          </button>
+          {/* 하단 버튼 */}
+          <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+            <button style={{ flex: 1, background: '#f1f5f9', border: '1px solid #cbd5e1', padding: '14px', borderRadius: '16px', fontWeight: 'bold', cursor: 'pointer', color: '#334155', fontSize: '13px' }}>
+              정보 관리
+            </button>
+            <button 
+              onClick={() => alert('해당 관계망 내 데이터 제공 동의 일괄 철회 완료')}
+              style={{ flex: 1.5, background: '#2563eb', color: '#ffffff', border: 'none', padding: '14px', borderRadius: '16px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px', boxShadow: '0 4px 15px rgba(37,99,235,0.3)' }}
+            >
+              탈퇴 페이지로 이동 ↗
+            </button>
+          </div>
         </div>
       )}
 
