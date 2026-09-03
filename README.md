@@ -1,75 +1,73 @@
-# React + TypeScript + Vite
+# NETRA — Network + Trace
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> 내 개인정보는 어디로 흘러가고 있을까?
+> 개인정보 처리방침에 공개된 제3자 제공·위탁·국외이전 정보를 구조화하여, 개인정보 유통 관계망을 3D 지구본 위에 시각화하는 연구 프로젝트입니다.
 
-Currently, two official plugins are available:
+**2026 건국대학교 학술공모전 「誠信義 — 공간의 변화와 인간의 삶」** 출품작
+지원 분야: 성(誠) — 첨단 기술이 만드는 새로운 공간
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## 프로젝트 소개
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+디지털 서비스를 이용하는 개인은 일상의 거의 모든 활동에서 개인정보를 남기지만, 그 정보가 어디에 저장되고 누구에게 제공되며 어떤 경로로 이동하는지는 파악하기 어렵습니다. 유통 구조를 알 수 있는 정보는 법적으로 공개되어 있지만, 장문의 처리방침 안에 텍스트로만 흩어져 있기 때문입니다.
 
-## Expanding the ESLint configuration
+NETRA는 이 비가시적인 데이터 유통 공간을 **지각 가능한 3D 공간으로 번역**합니다. 사용자는 지구본 위에서 자신이 이용하는 서비스와 그 서비스가 개인정보를 넘기는 기업·국가를 탐색하고, 확인한 정보를 바탕으로 열람·삭제 요구 등 데이터 주권을 행사할 수 있습니다.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 연구 질문
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+| | 연구 질문 | 검증 방식 |
+|---|---|---|
+| **RQ1** | 처리방침에 산재한 제3자 제공·위탁·국외이전 정보를 LLM 기반 파이프라인으로 정확하게 구조화할 수 있는가? | 추출 결과 전수 수기 검증 → 정밀도·재현율 산출 |
+| **RQ2** | 텍스트 원문 대비 3D 관계망 시각화가 유통 구조 이해도와 위험 인지를 높이는가? | 두 집단 비교 실험 (이해도 퀴즈·과제 수행 시간) |
+| **RQ3** | 시각화를 통한 인지 변화가 데이터 주권 행사 의도로 이어지는가? | 리커트 척도 설문 |
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 주요 기능 (예정)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- **지구본 뷰** — 이용 중인 서비스와 국외이전 경로를 호(arc)로 표현, 위험도를 색·굵기로 구분
+- **관계망 뷰** — `나 → 서비스 → 수탁사 → 재수탁사`로 이어지는 다단계 위탁 체인을 3D 그래프로 전개
+- **상세 패널** — 수집 항목, 보유기간, 제공·위탁 현황과 그 근거가 되는 처리방침 원문 조항 제시
+- **권리 행사 모듈** — 탈퇴 페이지 연결, 개인정보 보호책임자 앞 열람·삭제 요구 서신 초안 생성
 
-```
+## 기술 스택 (예정)
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+| 영역 | 기술 |
+|---|---|
+| Frontend | Next.js, React, TypeScript |
+| 3D 시각화 | react-globe.gl (Three.js/WebGL), 3d-force-graph |
+| 데이터 파이프라인 | Python, Playwright, Claude API |
+| 데이터 저장 | 정적 JSON (`data/services/`) |
+| 배포 | Vercel |
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 디렉터리 구조 (예정)
 
 ```
+netra/
+├── app/  components/  lib/     # Next.js 애플리케이션
+├── pipeline/                   # 처리방침 크롤링 · LLM 구조화 추출 스크립트
+├── data/
+│   ├── services/               # 검증 완료된 서비스별 JSON
+│   ├── schema.json             # 데이터 스키마 정의
+│   └── raw/                    # 크롤 원문 (git 미추적)
+├── docs/
+│   ├── risk-criteria.md        # 위험도 판정 기준
+│   └── experiment-design.md    # 사용자 실험 설계
+└── README.md
+```
+
+## 데이터 원칙
+
+- 모든 유통 관계 데이터는 **개인정보 보호법이 공개를 의무화한 정보**(제17조, 제26조, 제28조의8)에서만 추출합니다. 실제 유출 경로를 추적하거나 추정하지 않습니다.
+- LLM 추출 결과는 원문과 대조하는 수기 검증을 거친 뒤 PR 리뷰를 통해서만 `data/services/`에 반영됩니다.
+- 프로토타입은 실제 이용자 계정과 연동하지 않으며, 가상 페르소나 시나리오 데이터로 구동합니다.
+
+## 팀
+
+| 이름 | 역할 |
+|---|---|
+| 박경민 | Frontend · 3D 시각화 |
+| 신보연 | Frontend · 데이터 파이프라인 |
+| 장서윤 | UI/UX 디자인 |
+| 이지유 | 보안·법제 분석 · 실험 설계 |
+
+
