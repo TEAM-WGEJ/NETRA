@@ -107,19 +107,24 @@ export default function App() {
     }
   ];
 
-  // 메인 화면에 띄울 기본 아이콘들 (네이버, 인스타, 테무 등 시안 느낌)
+  // 메인 화면에 띄울 기본 아이콘들 ('나'를 중심으로 개인정보가 각 서비스로 흘러나가는 모습)
   const activeElements = selectedService ? selectedService.nodes : [
+    { id: 'me', name: '나', lat: 36.5, lng: 127.5, altitude: 0.05, logo: '👤', color: '#3b82f6' },
     { id: 'naver', name: '네이버', lat: 37.5, lng: 129.0, altitude: 0.2, logo: 'N', color: '#03C75A' },
     { id: 'insta', name: '인스타그램', lat: 25.0, lng: 110.0, altitude: 0.3, logo: '📷', color: '#E1306C' },
     { id: 'temu', name: '테무', lat: 45.0, lng: 140.0, altitude: 0.25, logo: '🛒', color: '#FF6600' },
     { id: 'cloud', name: '클라우드', lat: 15.0, lng: 135.0, altitude: 0.35, logo: '☁️', color: '#0284c7' }
   ];
 
-  const defaultArcs = activeElements.slice(0, -1).map((node: any, idx: number) => ({
-    startLat: node.lat, startLng: node.lng,
-    endLat: activeElements[idx + 1].lat, endLng: activeElements[idx + 1].lng,
-    color: 'rgba(148,163,184,0.4)'
-  }));
+  // 기본 상태의 arc는 '나'로부터 각 서비스로 개인정보가 흘러나가는 방향을 표현 (dash 애니메이션이 흐름 방향을 보여줌)
+  const meNode = activeElements.find((n: any) => n.id === 'me');
+  const defaultArcs = meNode ? activeElements
+    .filter((n: any) => n.id !== 'me')
+    .map((node: any) => ({
+      startLat: meNode.lat, startLng: meNode.lng,
+      endLat: node.lat, endLng: node.lng,
+      color: 'rgba(37,99,235,0.45)'
+    })) : [];
 
   const activeArcs = selectedService ? selectedService.arcs : defaultArcs;
 
@@ -252,7 +257,7 @@ export default function App() {
 
           el.onclick = (e) => {
             e.stopPropagation();
-            if (!selectedService) {
+            if (!selectedService && d.id !== 'me') {
               // 네이버나 테무 클릭 시 해당 체인으로 전환
               const found = networkServices.find(s => s.id === d.id || s.name.includes(d.name));
               if (found) setSelectedService(found);
@@ -269,6 +274,7 @@ export default function App() {
         arcDashGap={0.35}
         arcDashAnimateTime={1500}
         arcStroke={1.5}
+        arcAltitudeAutoScale={2.2}
       />
 
       {/* 지구본 우측 줌/리셋 컨트롤 */}
