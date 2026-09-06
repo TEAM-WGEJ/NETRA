@@ -69,6 +69,7 @@ export default function App() {
   const [countries, setCountries] = useState<any[]>([]);
   const [kakaomobilityRaw, setKakaomobilityRaw] = useState<any>(null);
   const [temuRaw, setTemuRaw] = useState<any>(null);
+  const [naverRaw, setNaverRaw] = useState<any>(null);
   const [coupangRaw, setCoupangRaw] = useState<any>(null);
   const [netflixRaw, setNetflixRaw] = useState<any>(null);
   const [googleRaw, setGoogleRaw] = useState<any>(null);
@@ -109,6 +110,14 @@ export default function App() {
       .then((res) => res.json())
       .then(setTemuRaw)
       .catch(() => setTemuRaw(null));
+  }, []);
+
+  // pipeline/extract_naver.py 로 네이버의 공개 정책 JSON API에서 그대로 받아온 데이터 (자동화, 봇 탐지 없음)
+  useEffect(() => {
+    fetch('/data/naver.json')
+      .then((res) => res.json())
+      .then(setNaverRaw)
+      .catch(() => setNaverRaw(null));
   }, []);
 
   // pipeline/extract_coupang.py 로 실제 처리방침 표에서 뽑아낸 데이터
@@ -267,6 +276,72 @@ export default function App() {
       nodes, arcs, chain,
     };
   }, [temuRaw]);
+
+  // 실제 처리방침 데이터(data/services/naver.json)에서 뽑은 네이버 서비스 노드
+  // 위탁 45건 · 제3자제공 92건은 국내 개별 주소가 없어 집계 노드로, 국외이전 8건 중
+  // 실제 국가명이 있는 6건만 국가별로 묶어 지구본에 표시한다. 나머지 2건("네이버 로그인"/
+  // "네이버 인증서")은 원문에 "제휴사별로 상이함"이라고만 나와 있어 특정 국가로 지어내지
+  // 않고 목록(chain)에만 텍스트로 남긴다.
+  const naverService = useMemo(() => {
+    if (!naverRaw) return null;
+
+    const meNode = { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' };
+    const collectorNode = { id: 'naver-hq', name: '네이버', lat: 37.6, lng: 127.8, altitude: 0.2, logo: 'N', color: '#03C75A' };
+    const consignmentNode = {
+      id: 'naver-consignment', name: `국내 위탁 ${naverRaw.consignment.length}곳`,
+      lat: 35.0, lng: 130.5, altitude: 0.3, logo: '🏢', color: '#64748b',
+    };
+    const thirdPartyNode = {
+      id: 'naver-third-party', name: `국내 제3자 제공 ${naverRaw.thirdPartyProvision.length}건`,
+      lat: 33.5, lng: 131.5, altitude: 0.35, logo: '🤝', color: '#94a3b8',
+    };
+
+    const geoOverseas = naverRaw.overseasTransfer.filter((t: any) => COUNTRY_COORDS[t.country]);
+    const variableOverseas = naverRaw.overseasTransfer.filter((t: any) => !COUNTRY_COORDS[t.country]);
+
+    const overseasCounts = new Map<string, number>();
+    for (const t of geoOverseas) {
+      overseasCounts.set(t.country, (overseasCounts.get(t.country) || 0) + 1);
+    }
+    const overseasPalette = ['#ef4444', '#f59e0b', '#8b5cf6', '#06b6d4'];
+    const overseasNodes = Array.from(overseasCounts.entries()).map(([country, count], idx) => {
+      const base = COUNTRY_COORDS[country];
+      return {
+        id: `naver-overseas-${idx}`, name: `${country} (${count}건)`,
+        lat: base.lat, lng: base.lng, altitude: 0.4 + idx * 0.05,
+        logo: '🌐', color: overseasPalette[idx % overseasPalette.length],
+      };
+    });
+
+    const nodes = [meNode, collectorNode, consignmentNode, thirdPartyNode, ...overseasNodes];
+    const arcs = [
+      { startLat: meNode.lat, startLng: meNode.lng, endLat: collectorNode.lat, endLng: collectorNode.lng, color: '#03C75A' },
+      { startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: consignmentNode.lat, endLng: consignmentNode.lng, color: '#64748b' },
+      { startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: thirdPartyNode.lat, endLng: thirdPartyNode.lng, color: '#94a3b8' },
+      ...overseasNodes.map((n: any) => ({
+        startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: n.lat, endLng: n.lng, color: n.color,
+      })),
+    ];
+
+    const chain = [
+      { node: '나', type: '정보주체', desc: '회원가입·서비스 이용 시 제공한 아이디·이름·연락처 등' },
+      { node: '네이버', type: '1차 수집', desc: `위탁 ${naverRaw.consignment.length}건 · 제3자 제공 ${naverRaw.thirdPartyProvision.length}건 공개 API로 확인 (data/services/naver.json 참고)` },
+      { node: consignmentNode.name, type: '위탁', desc: '시스템 개발/운영, 인프라, 고객상담 등 (기본 5 + 서비스별 40)' },
+      { node: thirdPartyNode.name, type: '제3자 제공', desc: '검역정보 연동, 금융 제휴, 서비스별 파트너 제공 등 92건' },
+      ...geoOverseas.map((t: any) => ({
+        node: `${t.recipient} (${t.country})`, type: '국외이전', desc: `${t.purposeAndItems} · ${t.retentionPeriod}`,
+      })),
+      ...variableOverseas.map((t: any) => ({
+        node: `${t.recipient} (제휴사별 상이)`, type: '국외이전', desc: `${t.purposeAndItems} · ${t.retentionPeriod}`,
+      })),
+    ];
+
+    return {
+      id: 'naver', name: 'naver.com', korName: '네이버 (NAVER)', logo: 'N', color: '#03C75A',
+      date: '공개 API 자동 수집', lastUse: '원문 참고 (policyUrl)', retention: '항목별로 상이 (상세 참고)', risk: '높음',
+      nodes, arcs, chain,
+    };
+  }, [naverRaw]);
 
   // 실제 처리방침 표(data/services/coupang.json)에서 뽑은 쿠팡 서비스 노드
   // 국외이전 12건(위탁 11 + 제3자 제공 1)은 국가별로 집계해 노드로 띄우고,
@@ -446,36 +521,7 @@ export default function App() {
     };
   }, [googleRaw]);
 
-  // 시안에 맞춘 서비스 및 3D 공간 노드 데이터
-  const mockServices = [
-    {
-      id: 'naver', name: 'naver.com', korName: '네이버', logo: 'N', color: '#03C75A',
-      date: '2022. 03. 15', lastUse: '2024. 05. 20', retention: '2년 3개월', risk: '보통',
-      nodes: [
-        { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' },
-        { id: 's1', name: '네이버', lat: 38.0, lng: 135.0, altitude: 0.25, logo: 'N', color: '#03C75A' },
-        { id: 's2', name: '네이버 클라우드', lat: 30.0, lng: 145.0, altitude: 0.45, logo: '☁️', color: '#0284c7' },
-        { id: 's3', name: '메가존 클라우드', lat: 20.0, lng: 155.0, altitude: 0.65, logo: 'M', color: '#6366f1' },
-        { id: 's4', name: '외부 파트너 외 3개', lat: 10.0, lng: 165.0, altitude: 0.85, logo: '⋯', color: '#64748b' }
-      ],
-      arcs: [
-        { startLat: 37.5, startLng: 127.0, endLat: 38.0, endLng: 135.0, color: '#03C75A' },
-        { startLat: 38.0, startLng: 135.0, endLat: 30.0, endLng: 145.0, color: '#0284c7' },
-        { startLat: 30.0, startLng: 145.0, endLat: 20.0, endLng: 155.0, color: '#6366f1' },
-        { startLat: 20.0, startLng: 155.0, endLat: 10.0, endLng: 165.0, color: '#64748b' }
-      ],
-      chain: [
-        { node: '나', type: '정보주체', desc: '최초 제공 (ID, 연락처)' },
-        { node: '네이버', type: '1차 수집', desc: '서비스 운영 및 타겟 광고' },
-        { node: '네이버 클라우드', type: '위탁', desc: '인프라 및 서버 스토리지' },
-        { node: '메가존 클라우드', type: '재위탁', desc: '데이터 관리 파트너' },
-        { node: '외 3개', type: '제3자', desc: '통계 분석 및 마케팅 연동' }
-      ]
-    }
-  ];
-
-  const realServices = [kakaomobilityService, temuService, coupangService, netflixService, googleService].filter(Boolean);
-  const networkServices = [...mockServices, ...realServices];
+  const networkServices = [kakaomobilityService, temuService, naverService, coupangService, netflixService, googleService].filter(Boolean);
 
   // 메인 화면에 띄울 기본 아이콘들 ('나'를 중심으로 개인정보가 각 서비스로 흘러나가는 모습)
   const activeElements = selectedService ? selectedService.nodes : [
