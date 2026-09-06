@@ -22,6 +22,22 @@ const COUNTRY_COORDS: Record<string, { lat: number; lng: number }> = {
   인도: { lat: 28.6139, lng: 77.2090 },
 };
 
+// arc 고도를 두 지점 사이 각거리(라디안)에 비례해 정하되 상한을 둔다.
+// 단거리(국내·인접국)는 최소 0.08로 봉긋하게 띄워 보이게 하고,
+// 장거리(한국->미국·호주 등)는 0.3에서 캡을 걸어 화면 밖으로 치솟지 않게 한다.
+const arcAltitudeByDistance = (d: any) => {
+  const toRad = (x: number) => (x * Math.PI) / 180;
+  const lat1 = toRad(d.startLat), lat2 = toRad(d.endLat);
+  const dLng = toRad(d.endLng - d.startLng);
+  const cosAngle = Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(dLng);
+  const angle = Math.acos(Math.min(1, Math.max(-1, cosAngle))); // 0 ~ PI
+  return Math.min(0.3, Math.max(0.08, angle * 0.25));
+};
+
+// 모든 arc에 공통으로 쓰는 색 (기본 화면과 서비스 선택 화면이 같은 톤을 유지하도록 통일).
+// 시작점(나/수집자) 쪽은 옅고 도착점 쪽으로 갈수록 진해져 흐름 방향이 읽힌다.
+const ARC_GRADIENT = ['rgba(37,99,235,0.2)', 'rgba(37,99,235,0.85)'];
+
 const iconButtonStyle: React.CSSProperties = {
   width: '38px', height: '38px', background: '#fff', borderRadius: '50%',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -466,12 +482,12 @@ export default function App() {
         }}
 
         arcsData={activeArcs}
-        arcColor="color"
+        arcColor={() => ARC_GRADIENT}
         arcDashLength={0.3}
         arcDashGap={0.35}
         arcDashAnimateTime={1500}
-        arcStroke={1.5}
-        arcAltitudeAutoScale={2.2}
+        arcStroke={1.2}
+        arcAltitude={arcAltitudeByDistance}
       />
 
       {/* 지구본 우측 줌/리셋 컨트롤 */}
