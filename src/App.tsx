@@ -19,7 +19,24 @@ const COUNTRY_COORDS: Record<string, { lat: number; lng: number }> = {
   싱가포르: { lat: 1.3521, lng: 103.8198 },
   말레이시아: { lat: 3.1390, lng: 101.6869 },
   아일랜드: { lat: 53.3498, lng: -6.2603 },
+  인도: { lat: 28.6139, lng: 77.2090 },
 };
+
+// arc 고도를 두 지점 사이 각거리(라디안)에 비례해 정하되 상한을 둔다.
+// 단거리(국내·인접국)는 최소 0.08로 봉긋하게 띄워 보이게 하고,
+// 장거리(한국->미국·호주 등)는 0.3에서 캡을 걸어 화면 밖으로 치솟지 않게 한다.
+const arcAltitudeByDistance = (d: any) => {
+  const toRad = (x: number) => (x * Math.PI) / 180;
+  const lat1 = toRad(d.startLat), lat2 = toRad(d.endLat);
+  const dLng = toRad(d.endLng - d.startLng);
+  const cosAngle = Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(dLng);
+  const angle = Math.acos(Math.min(1, Math.max(-1, cosAngle))); // 0 ~ PI
+  return Math.min(0.3, Math.max(0.08, angle * 0.25));
+};
+
+// 모든 arc에 공통으로 쓰는 색 (기본 화면과 서비스 선택 화면이 같은 톤을 유지하도록 통일).
+// 시작점(나/수집자) 쪽은 옅고 도착점 쪽으로 갈수록 진해져 흐름 방향이 읽힌다.
+const ARC_GRADIENT = ['rgba(37,99,235,0.2)', 'rgba(37,99,235,0.85)'];
 
 const iconButtonStyle: React.CSSProperties = {
   width: '38px', height: '38px', background: '#fff', borderRadius: '50%',
@@ -34,6 +51,7 @@ export default function App() {
   const [kakaomobilityRaw, setKakaomobilityRaw] = useState<any>(null);
   const [temuRaw, setTemuRaw] = useState<any>(null);
   const [naverRaw, setNaverRaw] = useState<any>(null);
+  const [coupangRaw, setCoupangRaw] = useState<any>(null);
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
   useEffect(() => {
@@ -79,6 +97,14 @@ export default function App() {
       .then((res) => res.json())
       .then(setNaverRaw)
       .catch(() => setNaverRaw(null));
+  }, []);
+
+  // pipeline/extract_coupang.py 로 실제 처리방침 표에서 뽑아낸 데이터
+  useEffect(() => {
+    fetch('/data/coupang.json')
+      .then((res) => res.json())
+      .then(setCoupangRaw)
+      .catch(() => setCoupangRaw(null));
   }, []);
 
   const globeMaterial = useMemo(() => {
@@ -280,7 +306,63 @@ export default function App() {
     };
   }, [naverRaw]);
 
-  const networkServices = [kakaomobilityService, temuService, naverService].filter(Boolean);
+  // 실제 처리방침 표(data/services/coupang.json)에서 뽑은 쿠팡 서비스 노드
+  // 국외이전 12건(위탁 11 + 제3자 제공 1)은 국가별로 집계해 노드로 띄우고,
+  // 상세 체인에는 건별 수신처를 그대로 나열한다. 국가가 특정되지 않은 행
+  // (원문이 '업체 리스트 참조'로만 공시)은 좌표를 만들지 않고 체인에만 표시한다.
+  const coupangService = useMemo(() => {
+    if (!coupangRaw) return null;
+
+    const meNode = { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' };
+    const collectorNode = { id: 'coupang-hq', name: '쿠팡', lat: 36.8, lng: 125.0, altitude: 0.2, logo: 'C', color: '#E52528' };
+    const consignmentNode = {
+      id: 'coupang-consignment', name: `국내 수탁사 ${coupangRaw.consignment.length}개 업무`,
+      lat: 33.5, lng: 124.0, altitude: 0.35, logo: '🏢', color: '#64748b'
+    };
+
+    const overseasCounts = new Map<string, number>();
+    for (const t of coupangRaw.overseasTransfer) {
+      if (!COUNTRY_COORDS[t.country]) continue;
+      overseasCounts.set(t.country, (overseasCounts.get(t.country) || 0) + 1);
+    }
+    const overseasPalette = ['#ef4444', '#f59e0b', '#8b5cf6', '#06b6d4', '#10b981', '#ec4899'];
+    const overseasNodes = Array.from(overseasCounts.entries()).map(([country, count], idx) => {
+      const base = COUNTRY_COORDS[country];
+      return {
+        id: `coupang-overseas-${idx}`, name: `${country} (${count}건)`,
+        lat: base.lat, lng: base.lng, altitude: 0.4 + idx * 0.03,
+        logo: '🌐', color: overseasPalette[idx % overseasPalette.length],
+      };
+    });
+
+    const nodes = [meNode, collectorNode, consignmentNode, ...overseasNodes];
+    const arcs = [
+      { startLat: meNode.lat, startLng: meNode.lng, endLat: collectorNode.lat, endLng: collectorNode.lng, color: '#E52528' },
+      { startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: consignmentNode.lat, endLng: consignmentNode.lng, color: '#64748b' },
+      ...overseasNodes.map((n: any) => ({
+        startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: n.lat, endLng: n.lng, color: n.color,
+      })),
+    ];
+
+    const chain = [
+      { node: '나', type: '정보주체', desc: '주문·결제·배송지·개인통관고유부호 등' },
+      { node: '쿠팡', type: '1차 수집', desc: `제3자 제공 ${coupangRaw.thirdPartyProvision.length}건 공시 (관세청·국세청 등 법령 근거 제공 포함)` },
+      { node: consignmentNode.name, type: '위탁', desc: '고객상담, 본인확인, 배송, 결제 등 (data/services/coupang.json 참고)' },
+      ...coupangRaw.overseasTransfer.map((t: any) => ({
+        node: `${t.recipient} (${t.country})`,
+        type: t.transferType === '제3자 제공' ? '국외 제3자 제공' : '국외이전',
+        desc: `${t.purposeAndItems} · ${t.retentionPeriod}`,
+      })),
+    ];
+
+    return {
+      id: 'coupang', name: 'coupang.com', korName: '쿠팡', logo: 'C', color: '#E52528',
+      date: `${coupangRaw.service.retrievedAt} 수집`, lastUse: '원문 참고 (policyUrl)', retention: '표별로 상이 (상세 참고)', risk: '높음',
+      nodes, arcs, chain,
+    };
+  }, [coupangRaw]);
+
+  const networkServices = [kakaomobilityService, temuService, naverService, coupangService].filter(Boolean);
 
   // 메인 화면에 띄울 기본 아이콘들 ('나'를 중심으로 개인정보가 각 서비스로 흘러나가는 모습)
   const activeElements = selectedService ? selectedService.nodes : [
@@ -289,7 +371,8 @@ export default function App() {
     { id: 'insta', name: '인스타그램', lat: 25.0, lng: 110.0, altitude: 0.3, logo: '📷', color: '#E1306C' },
     { id: 'temu', name: '테무', lat: 45.0, lng: 140.0, altitude: 0.25, logo: '🛒', color: '#FF6600' },
     { id: 'cloud', name: '클라우드', lat: 15.0, lng: 135.0, altitude: 0.35, logo: '☁️', color: '#0284c7' },
-    { id: 'kakaomobility', name: '카카오모빌리티', lat: 33.5, lng: 128.5, altitude: 0.4, logo: 'K', color: '#000000' }
+    { id: 'kakaomobility', name: '카카오모빌리티', lat: 33.5, lng: 128.5, altitude: 0.4, logo: 'K', color: '#000000' },
+    { id: 'coupang', name: '쿠팡', lat: 30.0, lng: 122.0, altitude: 0.3, logo: 'C', color: '#E52528' }
   ];
 
   // 기본 상태의 arc는 '나'로부터 각 서비스로 개인정보가 흘러나가는 방향을 표현 (dash 애니메이션이 흐름 방향을 보여줌)
@@ -445,12 +528,12 @@ export default function App() {
         }}
 
         arcsData={activeArcs}
-        arcColor="color"
+        arcColor={() => ARC_GRADIENT}
         arcDashLength={0.3}
         arcDashGap={0.35}
         arcDashAnimateTime={1500}
-        arcStroke={1.5}
-        arcAltitudeAutoScale={2.2}
+        arcStroke={1.2}
+        arcAltitude={arcAltitudeByDistance}
       />
 
       {/* 지구본 우측 줌/리셋 컨트롤 */}
