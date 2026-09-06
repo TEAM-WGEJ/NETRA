@@ -1,0 +1,172 @@
+대한민국 개인정보처리방침
+본 방침은 저희의 개인정보처리방침을 보완합니다.
+2026년 5월 8일부터 적용 | 인쇄용 버전 보기
+회원님의 정보 관련 권리 및 권리 행사 방법
+회원님은 회원님의 정보와 관련하여 다음과 같은 요청을 할 수 있습니다.
+회원님의 정보를 열람하기 위한 앱 내 도구를 이용하여 본인의 개인정보를 열람합니다.
+회원님의 정보를 정정하거나 삭제하기 위한 앱 내 도구를 이용하여 본인의 개인정보를 정정 또는 삭제합니다.
+회원님의 계정을 삭제하기 위한 앱 내 도구를 이용하여 본인의 개인정보 처리를 중단 조치합니다.
+회원님의 Facebook 설정 및 Instagram 설정에서 이 도구들에 대해서 자세히 알아보세요.
+저희는 회원님의 요청을 받은 후 회원님의 요청이 적법한지 검토합니다. 관련 법률에 따라 정당한 사유가 있는 경우 요청이 거부될 수 있습니다.
+회원님의 정보에 대한 보안 유지 조치
+저희는 다음을 포함하는 기술적∙관리적 조치를 시행하여 회원님의 정보가 안전하도록 보장하기 위해 최선을 다하고 있습니다.
+저희는 개인정보 보호 담당 임원의 선임 및 개인정보 처리 담당 직원 및 계약자에 대한 교육 요건을 포함하여 개인정보 관리를 위한 내부 정책을 수립 및 시행합니다.
+저희는 개인정보에 대한 접근 통제 시행 및 접근 기록을 포함하여 개인정보에 대한 접근을 통제 및 제한하는 조치를 취합니다.
+저희는 회원님의 정보를 분실, 도난, 오용 및 무단 접근으로부터 보호하기 위해 기타 적절한 조치를 사용합니다. 이러한 조치에는 침입 방지 및 탐지 시스템, 백신 소프트웨어 및 방화벽과 같은 컴퓨터 보호 조치와 저희 건물 및 파일에 대한 물리적 접근 통제가 포함됩니다.
+저희는 사이버 보안 위협에 대응하는 시스템 및 프로세스의 성숙도와 효과를 평가하고 개선이 필요한 영역과 개선의 기회를 파악하기 위해 주기적으로 위험 평가를 수행합니다. 또한 저희는 사이버 보안 위험 관리 프로세스의 평가 및 개선과 업계 사례에 대한 벤치마킹을 지원하기 위해 제3자 보안 전문가 및 컨설턴트를 고용합니다.
+저희는 사용자 데이터를 수집, 이용, 공유, 저장하는 방식과 관련된 개인정보 보호 위험을 평가하기 위해 개인정보 보호 위험 관리 프로그램을 유지하며, 이 프로그램은 독립적인 제3자 개인정보 보호 평가자가 시행하는 평가를 받습니다. 내부 감사 기능은 사이버 보안 및 개인정보 보호 프로그램의 전반적인 운영과 지원 관리 프레임워크에 대한 독립적인 평가 및 보증을 제공합니다.
+또한 저희는 제3자 평가(TPA) 프로세스를 포함하여 제3자 보안 위험에 적용되는 구체적인 정책 및 관행을 유지합니다. TPA 프로세스에 따라, 저희는 보안 관리와 관련된 잠재적 위험을 평가하기 위해 Meta와 계약을 체결하고 데이터를 공유 또는 수신하거나, 저희 시스템에 액세스 또는 통합되는 특정 제3자로부터 정보를 수집합니다. 또한 저희는 일반적으로 제3자에게 기밀 정보 및 데이터를 보호하기 위해 보안 관리를 유지하고 저희 데이터에 영향을 줄 수 있는 중대한 데이터 유출을 통지하도록 요구합니다.
+보유 및 이용 기간
+저희는 저희 제품을 제공하거나, 법적 의무를 준수하거나 저희 또는 다른 사람의 이익을 보호하기 위해 필요한 기간 동안 정보를 보유합니다. 저희는 사례별로 정보가 필요한 기간을 결정합니다. 저희는 기간을 결정할 때 다음 사항을 고려합니다.
+저희 제품을 운영하거나 제공하는 데 필요한지 여부. 예를 들어 저희는 회원님의 계정을 유지하기 위해 회원님의 정보 일부를 보유해야 할 수 있습니다.
+정보가 이용되는 기능 및 해당 기능의 작동 방식. 예를 들어 Messenger의 사라지는 모드로 보낸 메시지는 일반 메시지보다 짧은 기간 동안 보유됩니다.
+일정한 법적 의무를 준수하기 위해 정보를 보유해야 하는 기간.
+기타 정당한 목적으로 회원님의 정보가 필요한지 여부(예: 피해 예방 목적, 저희의 약관 또는 방침 위반 가능성 조사 목적, 안전∙보안∙무결성 강화 목적, 저희의 권리, 자산, 제품 등을 포함하여 저희 자신을 보호할 목적).
+저희가 회원님의 정보를 파기하기 위해 사용하는 방식 및 절차
+Meta는 회원님의 개인정보를 확실하게 파기하기 위한 기술적 절차를 갖추고 있습니다. 저희는 계정 삭제 절차가 시작되거나 콘텐츠 삭제 요청이 접수되고 90일 이내에 회원님의 정보를 파기하기 위한 기술적 조치를 취합니다. 정보가 삭제된 후에는 이를 백업과 재난 복구 시스템에서 삭제하는 데 90일이 더 걸릴 수 있습니다.
+위치 정보
+저희는 위치 정보 이용의 근거를 위치 기반 서비스 약관(특히 제5조)에 명시하고 있으며, 위치 정보의 보유 기간을 개인정보처리방침 내 '개인정보 보유 기간'이라는 제목 아래에 명시하고 있습니다.
+AI 관련 개인정보 제공
+개인정보처리방침에 명시된 바와 같이, 저희는 회원님이 Meta에서 제공하는 AI 솔루션에 포함된 기능을 사용하실 때 가장 관련성이 높은 정보를 제공할 수 있도록 검색 엔진 공급자 등 엄선된 파트너와 협력하고 있습니다. 아래 표에 기재된 파트너들은 저희가 공유하는 정보를 어떻게 이용하는지를 설명하는 자체 개인정보처리방침을 보유하고 있습니다.
+이러한 파트너는 대한민국 국외에 소재할 수 있습니다. 개인정보의 국외 이전은 필요할 때마다 수시로 통신망을 통해 이루어집니다. 회원님은 회원님의 개인정보 국외 이전을 거부할 수 있는 권리가 있습니다. 다만, 이 경우 Meta 제품을 계속해서 이용하지 못할 수 있습니다. 회원님의 정보와 관련된 요청이 있는 경우 개인정보처리방침의 연락처 상세 정보를 통해 저희에게 문의하세요.
+
+Microsoft
+Brave
+FinnHub
+Google
+개인정보의 처리 위탁 및 개인정보의 국외 이전
+개인정보처리방침에 명시된 바와 같이, 저희는 서비스 제공업체 및 기타 제3자와 개인정보를 공유합니다. 이러한 제3자는 대한민국 국외에 소재할 수 있습니다. 회원님은 회원님의 개인정보를 국외로 이전하는 것을 거부할 권리를 보유합니다. 다만, 이 경우 Meta 제품을 계속해서 이용하지 못할 수 있습니다. 회원님의 정보와 관련된 요청이 있는 경우 개인정보처리방침의 연락처 상세 정보를 통해 문의하세요.
+저희는 회원님의 개인정보를 보관하고 본 방침에 기재된 해외 수탁업체에 이전합니다. 대부분의 국외 이전은 회원님에게 저희 서비스를 제공하는 데 필요합니다. 다른 목적의 국외 이전인 경우 회원님에게 이전 동의가 제공됩니다.
+대한민국에 있는 사람들과 관련될 수 있는 개인정보를 이전받는 제3자에는 아래 표에 기재된 당사자들이 포함됩니다. 이 표는 정기적으로 업데이트됩니다.
+20 MINUTES FRANCE SAS
+AB180 INC
+ACCENTURE INTERNATIONAL LIMITED
+ACCENTURE LIMITED
+ACCENTURE LLP
+ACCENTURE SOLUTIONS PRIVATE LIMITED
+ADA DATA AI SOLUTIONS PTE LTD
+ADVANCED WIRELESS NETWORK CO LTD
+ADYEN NV
+AGENCE FRANCE PRESSE
+ALIPAY(EUROPE) LIMITED, S.A.
+AMERICA MOVIL PERU SAC
+APPEN AI INC
+APPSFLYER LTD
+ATENTO BRASIL SA
+AUSTRALIAN ASSOCIATED PRESS LTD
+BANGLALINK DIGITAL COMMUNICATIONS LIMITED
+BHARTI AIRTEL LIMITED
+BIG HOUSE CONSULTING LLC
+BIRD BV
+BUC MOBILE INC
+BUSINESS TELECOMMUNICATIONS SERVICES INC
+CAMGSM PLC
+CARDINALCOMMERCE CORPORATION
+CCC ERSTE BETEILIGUNGS GMBH
+CHINA MOBILE INTERNATIONAL LIMITED
+CLICKATELL INC
+CLIENT CO SERVICOS DE REDE NORDESTE SA
+CODE FOR AFRICA
+COMMUNIQUE MARKETING SOLUTIONS PRIVATE LIMITED
+CONCENTRIX CVG CUSTOMER MANAGEMENT GROUP INC
+CONCENTRIX CVG MALAYSIA SDN BHD
+CONCENTRIX INTERNATIONAL EUROPE BV
+CONCEPTO MOVIL SA DE CV
+CRESCENDO TRANSCRIPTION PRIVATE LIMITED
+CYBERSOURCE CORPORATION
+DITO TELECOMMUNITY CORPORATION
+ENTEL PCS TELECOMUNICACIONES SA
+ENTEL PERU SA
+FACTLY MEDIA AND RESEARCH
+GENPACT INDIA PRIVATE LIMITED
+GENPACT UK LIMITED
+GLOBAHUB AG
+GLOBAL MESSAGE SERVICES AG
+GOOGLE LLC
+GRUPO LA REPUBLICA PUBLICACIONES SA
+HORISEN MESSAGING AG
+HUGO TECHNOLOGIES INC
+IMPACT TECH INC
+INDOSAT TBK PT
+INFOBIP LTD
+INTEGRATEL PERU SAA
+JOURNAL MEDIA LTD
+JP MORGAN CHASE BANK NA
+JTBC CO LTD
+KASIKORNBANK GLOBAL PAYMENT COMPANY LIMITED
+KDDI AMERICA INC
+KOCHAVA INC
+KT CORPORATION
+LINKDOTNET TELECOM LIMITED
+LIVERAMP INC
+LUDWIG MAXIMILIAN UNIVERSITY OF MUNICH
+M360 INC
+MADA COMMUNICATIONS SA
+MGP FACT CHECK LTD
+MITTO AG
+MMI ONLINE LIMITED
+MONTY UK GLOBAL LTD
+MTN DUBAI LIMITED
+NC MEDIA NETWORKS PVT LTD
+NEST CENTER FOR JOURNALISM INNOVATION AND DEVELOPMENT
+NEUSTAR INC
+NEUSTAR INFORMATION SERVICES INC
+OI SA EM RECUPERACAO JUDICIAL
+OPTIMUM TELECOM ALGERIE SPA
+ORANGE SA
+OTECEL SA
+OUTCUE MEDIA PRIVATE LIMITED
+PAYPAL INC
+PEGASO PCS SA DE CV
+PLIVO INC
+PRIVATE IDENTITY LLC
+PT INFO MEDIA DIGITAL
+PT LIPUTAN ENAM DOT COM
+PT SMARTFREN TELECOM TBK
+RAPPLER INC
+RELIANCE JIO INFOCOMM LIMITED
+REUTERS NEWS AND MEDIA INC
+ROUTE MOBILE UK LIMITED
+SAFARICOM
+SALESFORCE INC
+SHOPIFY INC
+SINCH SWEDEN AB
+SINGULAR LABS INC
+SKOVIAN VENTURES
+SPA EL WATANIA TELECOM ALGERIE
+STOPFAKE LIMITED LIABILITY COMPANY
+STRIPE INC
+SYNIVERSE CORPORATION
+TASKUS HOLDINGS INC
+TDCX SG PTE LTD
+TELCORDIA TECHNOLOGIES INC
+TELECOM ARGENTINA S A
+TELEFONICA GLOBAL SOLUTIONS SL
+TELEFONICA MOVILES ARGENTINA SOCIEDAD ANONIMA
+TELEFONICA MOVILES CHILE SA
+TELEKOMUNIKASI INDONESIA INTERNATIONAL HONGKONG LIMITED
+TELEPERFORMANCE COLOMBIA SAS
+TELEPERFORMANCE CRM SA
+TELEPERFORMANCE MALAYSIA SDN BHD
+TELEPERFORMANCE PORTUGAL SA
+TELESIGN CORPORATION
+TNS PLUS LLP
+TV TODAY NETWORK LIMITED
+TWILIO INC
+TYNTEC LIMITED
+UNITEL
+UNITY INC
+UNIVERSITY COLLEGE LONDON
+UNIVERSO ONLINE SA
+VERAFILES INCORPORATED
+VIETTEL GROUP
+VISA INTERNATIONAL SERVICE ASSOCIATION
+VODAFONE GROUP SERVICES LIMITED
+VONAGE BUSINESS INC
+WIPRO LIMITED
+WIPRO PHILIPPINES INC
+WORLD MOBILE NEWS NETWORK PRIVATE LTD
+YOTI USA INC
+YPIRESIA 800 TELEPERFORMANCE SINGLE MEMBER SA
+YULCHON LLC
+ZAIN OMANTEL INTERNATIONAL FZ LLC
