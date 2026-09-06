@@ -41,7 +41,7 @@
     },
     "overseasTransfer": {
       "type": "array",
-      "description": "개인정보 국외이전 현황 (개인정보 보호법 제28조의8)",
+      "description": "개인정보 국외이전 현황 (개인정보 보호법 제28조의8). 위탁과 국외이전을 별도 표로 공시하는 서비스(예: 카카오모빌리티)용.",
       "items": {
         "type": "object",
         "properties": {
@@ -51,6 +51,31 @@
           "contact": { "type": "string", "description": "정보관리책임자의 연락처" },
           "purposeAndItems": { "type": "string", "description": "이전목적 및 이전정보 항목" },
           "retentionPeriod": { "type": "string", "description": "이전받는 자의 개인정보 보유기간" }
+        }
+      }
+    },
+    "consignmentAndOverseasTransfer": {
+      "type": "array",
+      "description": "위탁과 국외이전을 하나의 표로 통합해 공시하는 서비스(예: Temu)용 선택적 필드. consignment/overseasTransfer가 원문에서 분리되어 있지 않을 때, 그 표를 있는 그대로 옮긴다 (억지로 나누지 않음). 각 원소는 원문의 '구분(category)' 한 그룹에 해당하며, 그 그룹에 속한 수신처들을 recipients로 묶는다.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": { "type": "string", "description": "위탁 업무 구분 (원문의 '구분' 컬럼)" },
+          "recipients": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string", "description": "이전/위탁 받는 자" },
+                "contact": { "type": "string", "description": "연락처 (이메일 또는 문의 페이지)" },
+                "country": { "type": "string", "description": "소재 국가 (복수 국가는 쉼표로 나열된 원문 그대로)" }
+              }
+            }
+          },
+          "items": { "type": "string", "description": "이전/위탁되는 개인정보 항목" },
+          "purpose": { "type": "string", "description": "이용 목적 / 위탁 업무" },
+          "transferredAt": { "type": ["string", "null"], "description": "이전 시기 및 방법. 원문 표의 병합 셀 구조상 확인되지 않으면 null." },
+          "retentionPeriod": { "type": ["string", "null"], "description": "보유·이용기간. 확인되지 않으면 null." }
         }
       }
     }
