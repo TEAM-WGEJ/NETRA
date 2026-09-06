@@ -1,0 +1,195 @@
+{
+  "service": {
+    "id": "google",
+    "name": "구글",
+    "policyUrl": "https://policies.google.com/privacy?hl=ko",
+    "consignmentSourceUrl": "https://policies.google.com/privacy/additional?hl=ko&gl=kr",
+    "retrievedAt": "2026-09-06",
+    "retrievalMethod": "정적 HTML 자동 파싱 (pipeline/extract_google.py). 한국 거주자용 부록 문서의 위탁·국외이전·제공 표 3개를 사용.",
+    "notes": "국가가 별도 컬럼이 아니라 회사명 끝 괄호에 적혀 있어 파싱해 countries 파생 필드로 옮겼다. 국외 수탁 표에는 이전 일시·방법과 보유기간 컬럼이 아예 없어 해당 값은 null이다. transferType·countryDisclosed는 schema.json 밖의 보조 필드.",
+    "disclosureGaps": [
+      "이용자 정보 전체가 '국외에 소재하는 Google의 데이터 센터'로 전송된다고만 밝히고 이전 국가를 공시하지 않음 (overseasTransfer의 country=null 항목).",
+      "국외 수탁 표에 이전 일시·방법 및 보유기간 항목이 없음.",
+      "위탁업체 8곳은 소재 국가 표기가 없어 국내인지 국외인지 원문만으로 판별 불가: (주)트랜스코스모스코리아, 한국모바일인증(주), 토스페이먼츠 주식회사, 엔에이치엔페이코(주), 엔에이치엔케이씨피 주식회사, (주)코스콤, Concentrix Corporation, 김·장 법률사무소"
+    ]
+  },
+  "consignment": [
+    {
+      "task": "고객 지원 및 민원 처리 서비스 제공",
+      "consignee": "(주)트랜스코스모스코리아",
+      "retentionPeriod": null,
+      "countries": []
+    },
+    {
+      "task": "성인인증 및 본인인증 서비스 제공",
+      "consignee": "한국모바일인증(주)",
+      "retentionPeriod": null,
+      "countries": []
+    },
+    {
+      "task": "결제 서비스 및 고지 서비스 제공",
+      "consignee": "토스페이먼츠 주식회사",
+      "retentionPeriod": null,
+      "countries": []
+    },
+    {
+      "task": "결제 서비스 및 고지 서비스 제공",
+      "consignee": "엔에이치엔페이코(주)",
+      "retentionPeriod": null,
+      "countries": []
+    },
+    {
+      "task": "결제 서비스 및 고지 서비스 제공",
+      "consignee": "엔에이치엔케이씨피 주식회사",
+      "retentionPeriod": null,
+      "countries": []
+    },
+    {
+      "task": "신용정보의 이용 및 보호에 관한 법률에 따른 중계기관",
+      "consignee": "(주)코스콤",
+      "retentionPeriod": null,
+      "countries": []
+    },
+    {
+      "task": "고객 지원",
+      "consignee": "Concentrix Corporation",
+      "retentionPeriod": null,
+      "countries": []
+    },
+    {
+      "task": "고객 지원, 고객확인 및 특정 금융거래정보의 보고 및 이용 등에 관한 법률에 따라 요구되는 자금세탁방지 모니터링",
+      "consignee": "Accenture",
+      "retentionPeriod": null,
+      "countries": [
+        "말레이시아",
+        "인도"
+      ]
+    },
+    {
+      "task": "결제 서비스 및 고지 서비스 제공",
+      "consignee": "Alipay Singapore e‑Commerce Pte. Ltd.",
+      "retentionPeriod": null,
+      "countries": [
+        "싱가포르"
+      ]
+    },
+    {
+      "task": "고객 지원",
+      "consignee": "Concentrix Solutions Corporation",
+      "retentionPeriod": null,
+      "countries": [
+        "필리핀"
+      ]
+    },
+    {
+      "task": "연령확인",
+      "consignee": "Tech Mahindra Limited",
+      "retentionPeriod": null,
+      "countries": [
+        "인도"
+      ]
+    },
+    {
+      "task": "이용자 개인정보 보호 관련 요청 검토 및 처리",
+      "consignee": "Vaco by Highspring",
+      "retentionPeriod": null,
+      "countries": [
+        "미국"
+      ]
+    },
+    {
+      "task": "국내대리인 관련 업무 보조",
+      "consignee": "김·장 법률사무소",
+      "retentionPeriod": null,
+      "countries": []
+    }
+  ],
+  "thirdPartyProvision": [
+    {
+      "recipient": "(주)케이티, (주)엘지유플러스, SK텔레콤(주)",
+      "purpose": "통신과금서비스 제공, 거래확인 및 승인, 환불, 결제, 고객지원 등",
+      "items": "고객식별정보; 거래정보",
+      "retentionPeriod": "(1) 거래금액이 1만원 초과인 경우 5년; (2) 거래금액이 1만원 이하인 경우 1년 (단, 각 통신사의 개인정보 처리방침에 따라 다를 수 있음)"
+    },
+    {
+      "recipient": "Google Play 앱 개발자들 (앱 개발자들에 대한 보다 구체적인 사항은 여기 참조)",
+      "purpose": "(1) 인앱 구매 항목, 컨텐츠 또는 서비스 제공, (2) 고객지원 제공, (3) 사기, 악용 사례, 보안 위험, 기술적 문제 감지, 예방 및 대응, (4) 서비스 관리 및 개선",
+      "items": "이용자 구매 관련 세부 정보",
+      "retentionPeriod": "개발자의 이용자 정보 보유 및 이용기간은 Play 스토어의 앱 정보 페이지에 기재된 개발자의 개인정보 처리방침을 참조"
+    }
+  ],
+  "overseasTransfer": [
+    {
+      "country": "말레이시아, 인도",
+      "countries": [
+        "말레이시아",
+        "인도"
+      ],
+      "transferredAt": null,
+      "recipient": "Accenture",
+      "contact": "dataprivacyofficer@accenture.com",
+      "purposeAndItems": "고객 지원, 고객확인 및 특정 금융거래정보의 보고 및 이용 등에 관한 법률에 따라 요구되는 자금세탁방지 모니터링 / 고객 지원 및 고객 확인: 이름, 이메일, 주소, 구매 및 서비스 이용내역, 결제수단 정보 등 / 자금세탁방지 모니터링: 이메일, 주소, 생년월일 등 신원 확인을 위한 정보 및 거래내역과 관련된 정보",
+      "retentionPeriod": null,
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "싱가포르",
+      "countries": [
+        "싱가포르"
+      ],
+      "transferredAt": null,
+      "recipient": "Alipay Singapore e‑Commerce Pte. Ltd.",
+      "contact": "Privacy‑OpenPlatform@alipay.com",
+      "purposeAndItems": "결제 서비스 및 고지 서비스 제공 / 요청 확인 ID, 구매 요청 토큰, 구글 계정 및 결제 계정을 링크하는 ID, 구매 항목, 통화 코드, 구매 금액 등",
+      "retentionPeriod": null,
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "필리핀",
+      "countries": [
+        "필리핀"
+      ],
+      "transferredAt": null,
+      "recipient": "Concentrix Solutions Corporation",
+      "contact": "aditya.mehrotra@concentrix.com",
+      "purposeAndItems": "고객 지원 / 고객 지원: 이름, 이메일, 주소, 구매 및 서비스 이용내역, 결제수단 정보 등",
+      "retentionPeriod": null,
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "인도",
+      "countries": [
+        "인도"
+      ],
+      "transferredAt": null,
+      "recipient": "Tech Mahindra Limited",
+      "contact": "dhirender.singh@techmahindra.com",
+      "purposeAndItems": "연령확인 / 결제 프로필, 생년월일, 신분증 사본(고유 식별 번호 제외) 등",
+      "retentionPeriod": null,
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국",
+      "countries": [
+        "미국"
+      ],
+      "transferredAt": null,
+      "recipient": "Vaco by Highspring",
+      "contact": "infosec@highspring.com",
+      "purposeAndItems": "이용자 개인정보 보호 관련 요청 검토 및 처리 / 이용자 개인정보 보호 요청 처리: 이름, 이메일 주소, 국가 및 관련 문의 양식 제출 시 사용자가 제공한 기타 정보",
+      "retentionPeriod": null,
+      "transferType": "처리위탁"
+    },
+    {
+      "country": null,
+      "countries": [],
+      "transferredAt": "수집과 동시에 정보통신망을 통하여 전송",
+      "recipient": "국외에 소재하는 Google의 데이터 센터",
+      "contact": "googlekrsupport@google.com",
+      "purposeAndItems": "서비스 제공 및 정보보호 등 / 본 문서에 열거된 수집 항목 전체",
+      "retentionPeriod": "사용자 삭제 시 또는 사용자가 설정한 자동삭제 기간까지 (법정 보관 의무 시 5년 이상)",
+      "transferType": "자사 데이터센터 이전",
+      "countryDisclosed": false
+    }
+  ]
+}
