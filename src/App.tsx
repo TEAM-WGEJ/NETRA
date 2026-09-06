@@ -72,6 +72,7 @@ export default function App() {
   const [naverRaw, setNaverRaw] = useState<any>(null);
   const [coupangRaw, setCoupangRaw] = useState<any>(null);
   const [netflixRaw, setNetflixRaw] = useState<any>(null);
+  const [googleRaw, setGoogleRaw] = useState<any>(null);
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
   useEffect(() => {
@@ -133,6 +134,14 @@ export default function App() {
       .then((res) => res.json())
       .then(setNetflixRaw)
       .catch(() => setNetflixRaw(null));
+  }, []);
+
+  // pipeline/extract_google.py 로 한국 거주자용 부록 문서에서 뽑아낸 데이터
+  useEffect(() => {
+    fetch('/data/google.json')
+      .then((res) => res.json())
+      .then(setGoogleRaw)
+      .catch(() => setGoogleRaw(null));
   }, []);
 
   const globeMaterial = useMemo(() => {
@@ -449,7 +458,73 @@ export default function App() {
     };
   }, [netflixRaw]);
 
-  const networkServices = [kakaomobilityService, temuService, naverService, coupangService, netflixService].filter(Boolean);
+  // 실제 부록 문서(data/services/google.json)에서 뽑은 구글 서비스 노드
+  // 구글은 국가를 공시한 국외 수탁사(5곳)와, 국가를 밝히지 않은 자사 데이터센터 이전이
+  // 함께 있다. 후자는 좌표를 만들 수 없으므로 지구본에는 띄우지 않고 체인에만 남긴다.
+  const googleService = useMemo(() => {
+    if (!googleRaw) return null;
+
+    const meNode = { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' };
+    const collectorNode = { id: 'google-hq', name: '구글', lat: 38.5, lng: 121.0, altitude: 0.2, logo: 'G', color: '#4285F4' };
+    const domesticCount = googleRaw.consignment.filter((c: any) => c.countries.length === 0).length;
+    const consignmentNode = {
+      id: 'google-consignment', name: `국가 미표기 위탁사 ${domesticCount}곳`,
+      lat: 34.0, lng: 118.5, altitude: 0.35, logo: '🏢', color: '#64748b'
+    };
+
+    const overseasCounts = new Map<string, number>();
+    for (const t of googleRaw.overseasTransfer) {
+      for (const raw of t.countries) {
+        const country = normalizeCountry(raw);
+        if (!COUNTRY_COORDS[country]) continue;
+        overseasCounts.set(country, (overseasCounts.get(country) || 0) + 1);
+      }
+    }
+
+    const overseasPalette = ['#ef4444', '#f59e0b', '#8b5cf6', '#06b6d4', '#10b981', '#ec4899'];
+    const overseasNodes = Array.from(overseasCounts.entries()).map(([country, count], idx) => {
+      const base = COUNTRY_COORDS[country];
+      return {
+        id: `google-overseas-${idx}`, name: `${country} (${count}건)`,
+        lat: base.lat, lng: base.lng, altitude: 0.4,
+        logo: '🌐', color: overseasPalette[idx % overseasPalette.length],
+      };
+    });
+
+    const nodes = [meNode, collectorNode, consignmentNode, ...overseasNodes];
+    const arcs = [
+      { startLat: meNode.lat, startLng: meNode.lng, endLat: collectorNode.lat, endLng: collectorNode.lng, color: '#4285F4' },
+      { startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: consignmentNode.lat, endLng: consignmentNode.lng, color: '#64748b' },
+      ...overseasNodes.map((n: any) => ({
+        startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: n.lat, endLng: n.lng, color: n.color,
+      })),
+    ];
+
+    const chain = [
+      { node: '나', type: '정보주체', desc: '계정정보·검색어·기기정보·위치정보·통화기록 등' },
+      { node: '구글', type: '1차 수집', desc: `위탁 ${googleRaw.consignment.length}곳 · 제3자 제공 ${googleRaw.thirdPartyProvision.length}건 공시` },
+      { node: consignmentNode.name, type: '위탁', desc: '원문이 소재 국가를 적지 않아 국내·국외 판별 불가 (service.disclosureGaps 참고)' },
+      ...googleRaw.overseasTransfer.map((t: any) => ({
+        node: t.countries.length ? `${t.recipient} (${t.countries.map(normalizeCountry).join(', ')})` : t.recipient,
+        type: t.transferType === '자사 데이터센터 이전' ? '국외이전 (국가 미공시)' : '국외이전',
+        desc: t.purposeAndItems,
+      })),
+      ...googleRaw.thirdPartyProvision.map((t: any) => ({
+        node: t.recipient, type: '제3자 제공', desc: `${t.purpose} / ${t.items}`,
+      })),
+    ];
+
+    return {
+      id: 'google', name: 'google.com', korName: '구글', logo: 'G', color: '#4285F4',
+      date: `${googleRaw.service.retrievedAt} 수집`, lastUse: '원문 참고 (policyUrl)', retention: '사용자 삭제 시까지 (법정 의무 시 5년 이상)', risk: '높음',
+      nodes, arcs, chain,
+    };
+  }, [googleRaw]);
+
+  // filter(Boolean)만으로는 TS가 null을 걸러낸 걸 알지 못해 아래 find(s => s.id ...)에서
+  // 's' is possibly 'null' 이 난다. 타입 가드로 좁혀 준다.
+  const networkServices = [kakaomobilityService, temuService, naverService, coupangService, netflixService, googleService]
+    .filter((s): s is NonNullable<typeof s> => s !== null);
 
   // 메인 화면에 띄울 기본 아이콘들 ('나'를 중심으로 개인정보가 각 서비스로 흘러나가는 모습)
   const activeElements = selectedService ? selectedService.nodes : [
@@ -460,7 +535,8 @@ export default function App() {
     { id: 'cloud', name: '클라우드', lat: 15.0, lng: 135.0, altitude: 0.35, logo: '☁️', color: '#0284c7' },
     { id: 'kakaomobility', name: '카카오모빌리티', lat: 33.5, lng: 128.5, altitude: 0.4, logo: 'K', color: '#000000' },
     { id: 'coupang', name: '쿠팡', lat: 30.0, lng: 122.0, altitude: 0.3, logo: 'C', color: '#E52528' },
-    { id: 'netflix', name: '넷플릭스', lat: 41.0, lng: 118.0, altitude: 0.35, logo: 'N', color: '#E50914' }
+    { id: 'netflix', name: '넷플릭스', lat: 41.0, lng: 118.0, altitude: 0.35, logo: 'N', color: '#E50914' },
+    { id: 'google', name: '구글', lat: 22.0, lng: 124.0, altitude: 0.3, logo: 'G', color: '#4285F4' }
   ];
 
   // 기본 상태의 arc는 '나'로부터 각 서비스로 개인정보가 흘러나가는 방향을 표현 (dash 애니메이션이 흐름 방향을 보여줌)
