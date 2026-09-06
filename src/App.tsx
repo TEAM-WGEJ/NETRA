@@ -82,6 +82,7 @@ export default function App() {
   const [netflixRaw, setNetflixRaw] = useState<any>(null);
   const [googleRaw, setGoogleRaw] = useState<any>(null);
   const [metaRaw, setMetaRaw] = useState<any>(null);
+  const [kakaoRaw, setKakaoRaw] = useState<any>(null);
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
   useEffect(() => {
@@ -159,6 +160,15 @@ export default function App() {
       .then((res) => res.json())
       .then(setMetaRaw)
       .catch(() => setMetaRaw(null));
+  }, []);
+
+  // pipeline/extract_kakao.py 로 카카오(주) 처리방침 부속 페이지 4개에서 뽑아낸 데이터
+  // (자회사 카카오모빌리티와는 별개 문서 - data/services/kakao.json 의 notes 참고)
+  useEffect(() => {
+    fetch('/data/kakao.json')
+      .then((res) => res.json())
+      .then(setKakaoRaw)
+      .catch(() => setKakaoRaw(null));
   }, []);
 
   const globeMaterial = useMemo(() => {
@@ -607,7 +617,84 @@ export default function App() {
     };
   }, [metaRaw]);
 
-  const networkServices = [kakaomobilityService, temuService, naverService, coupangService, netflixService, googleService, metaService]
+  // 실제 처리방침 부속 페이지(data/services/kakao.json)에서 뽑은 카카오(주) 서비스 노드.
+  // 자회사 카카오모빌리티 노드와 헷갈리지 않도록 로고를 '카'로 두어 구분한다.
+  // 카카오만 가진 특징: 계열사에서 카카오로 정보가 들어오는 역방향 제공(thirdPartyReceipt)이
+  // 공시되어 있어, 그 흐름은 화살표를 반대로(계열사 -> 카카오) 그린다.
+  const kakaoService = useMemo(() => {
+    if (!kakaoRaw) return null;
+
+    const meNode = { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' };
+    const collectorNode = { id: 'kakao-hq', name: '카카오', lat: 39.5, lng: 130.5, altitude: 0.2, logo: '카', color: '#3C1E1E' };
+    const consignmentNode = {
+      id: 'kakao-consignment', name: `국내 수탁 ${kakaoRaw.consignment.length}개 업무`,
+      lat: 42.5, lng: 133.0, altitude: 0.35, logo: '🏢', color: '#64748b',
+    };
+    const thirdPartyNode = {
+      id: 'kakao-thirdparty', name: `국내 제3자 제공 ${kakaoRaw.thirdPartyProvision.length}건`,
+      lat: 36.0, lng: 134.5, altitude: 0.32, logo: '🤝', color: '#0ea5e9',
+    };
+    const receiptNode = {
+      id: 'kakao-receipt', name: `계열사에서 유입 ${kakaoRaw.thirdPartyReceipt.length}건`,
+      lat: 43.5, lng: 124.5, altitude: 0.3, logo: '⬅️', color: '#a855f7',
+    };
+
+    const overseasCounts = new Map<string, number>();
+    for (const t of kakaoRaw.overseasTransfer) {
+      for (const raw of t.countries) {
+        const country = normalizeCountry(raw);
+        if (!COUNTRY_COORDS[country]) continue;
+        overseasCounts.set(country, (overseasCounts.get(country) || 0) + 1);
+      }
+    }
+    const palette = ['#ef4444', '#f59e0b', '#8b5cf6', '#06b6d4'];
+    const overseasNodes = Array.from(overseasCounts.entries()).map(([country, count], idx) => {
+      const base = COUNTRY_COORDS[country];
+      return {
+        id: `kakao-overseas-${idx}`, name: `${country} (${count}건)`,
+        lat: base.lat, lng: base.lng, altitude: 0.4,
+        logo: '🌐', color: palette[idx % palette.length],
+      };
+    });
+
+    const nodes = [meNode, collectorNode, consignmentNode, thirdPartyNode, receiptNode, ...overseasNodes];
+    const arcs = [
+      { startLat: meNode.lat, startLng: meNode.lng, endLat: collectorNode.lat, endLng: collectorNode.lng, color: '#3C1E1E' },
+      { startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: consignmentNode.lat, endLng: consignmentNode.lng, color: '#64748b' },
+      { startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: thirdPartyNode.lat, endLng: thirdPartyNode.lng, color: '#0ea5e9' },
+      // 역방향: 계열사 -> 카카오
+      { startLat: receiptNode.lat, startLng: receiptNode.lng, endLat: collectorNode.lat, endLng: collectorNode.lng, color: '#a855f7' },
+      ...overseasNodes.map((n: any) => ({
+        startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: n.lat, endLng: n.lng, color: n.color,
+      })),
+    ];
+
+    const receiptProviders = Array.from(new Set(kakaoRaw.thirdPartyReceipt.map((r: any) => r.provider)));
+    const chain = [
+      { node: '나', type: '정보주체', desc: '카카오계정·카카오톡 이용기록·연계정보(CI) 등' },
+      { node: '카카오', type: '1차 수집', desc: `위탁 ${kakaoRaw.consignment.length}개 업무 · 제3자 제공 ${kakaoRaw.thirdPartyProvision.length}건 · 국외이전 ${kakaoRaw.overseasTransfer.length}건 공시` },
+      { node: consignmentNode.name, type: '위탁', desc: '고객센터, 본인확인, 결제처리, 문자발송 등 (data/services/kakao.json 참고)' },
+      { node: receiptNode.name, type: '역방향 제공(유입)', desc: `${receiptProviders.slice(0, 4).join(', ')} 등에서 카카오로 제공되는 정보` },
+      ...kakaoRaw.overseasTransfer.map((t: any) => ({
+        node: `${t.recipient} (${t.country})`,
+        type: '국외이전',
+        desc: `${t.purposeAndItems} · ${t.retentionPeriod}`,
+      })),
+      ...kakaoRaw.thirdPartyProvision.map((t: any) => ({
+        node: t.recipient,
+        type: `제3자 제공 · ${t.serviceName}`,
+        desc: `${t.purpose} / ${t.items}`,
+      })),
+    ];
+
+    return {
+      id: 'kakao', name: 'kakao.com', korName: '카카오', logo: '카', color: '#3C1E1E',
+      date: `${kakaoRaw.service.retrievedAt} 수집`, lastUse: '원문 참고 (policyUrl)', retention: '표별로 상이 (상세 참고)', risk: '높음',
+      nodes, arcs, chain,
+    };
+  }, [kakaoRaw]);
+
+  const networkServices = [kakaomobilityService, temuService, naverService, coupangService, netflixService, googleService, metaService, kakaoService]
     .filter((s): s is NonNullable<typeof s> => s !== null);
 
   // 메인 화면에 띄울 기본 아이콘들 ('나'를 중심으로 개인정보가 각 서비스로 흘러나가는 모습)
@@ -621,7 +708,8 @@ export default function App() {
     { id: 'coupang', name: '쿠팡', lat: 30.0, lng: 122.0, altitude: 0.3, logo: 'C', color: '#E52528' },
     { id: 'netflix', name: '넷플릭스', lat: 41.0, lng: 118.0, altitude: 0.35, logo: 'N', color: '#E50914' },
     { id: 'google', name: '구글', lat: 22.0, lng: 124.0, altitude: 0.3, logo: 'G', color: '#4285F4' },
-    { id: 'meta', name: '메타 (인스타그램)', lat: 28.0, lng: 113.0, altitude: 0.35, logo: 'M', color: '#0866FF' }
+    { id: 'meta', name: '메타 (인스타그램)', lat: 28.0, lng: 113.0, altitude: 0.35, logo: 'M', color: '#0866FF' },
+    { id: 'kakao', name: '카카오', lat: 40.0, lng: 133.0, altitude: 0.3, logo: '카', color: '#3C1E1E' }
   ];
 
   // 기본 상태의 arc는 '나'로부터 각 서비스로 개인정보가 흘러나가는 방향을 표현 (dash 애니메이션이 흐름 방향을 보여줌)
