@@ -521,7 +521,10 @@ export default function App() {
     };
   }, [googleRaw]);
 
-  const networkServices = [kakaomobilityService, temuService, naverService, coupangService, netflixService, googleService].filter(Boolean);
+  // filter(Boolean)만으로는 TS가 null을 걸러낸 걸 알지 못해 아래 find(s => s.id ...)에서
+  // 's' is possibly 'null' 이 난다. 타입 가드로 좁혀 준다.
+  const networkServices = [kakaomobilityService, temuService, naverService, coupangService, netflixService, googleService]
+    .filter((s): s is NonNullable<typeof s> => s !== null);
 
   // 메인 화면에 띄울 기본 아이콘들 ('나'를 중심으로 개인정보가 각 서비스로 흘러나가는 모습)
   const activeElements = selectedService ? selectedService.nodes : [
