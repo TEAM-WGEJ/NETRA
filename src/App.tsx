@@ -11,6 +11,14 @@ const COUNTRY_COORDS: Record<string, { lat: number; lng: number }> = {
   일본: { lat: 35.6762, lng: 139.6503 },
   벨기에: { lat: 50.8503, lng: 4.3517 },
   베트남: { lat: 21.0278, lng: 105.8342 },
+  미국: { lat: 38.9072, lng: -77.0369 },
+  호주: { lat: -35.2809, lng: 149.1300 },
+  네덜란드: { lat: 52.3676, lng: 4.9041 },
+  영국: { lat: 51.5072, lng: -0.1276 },
+  중국: { lat: 39.9042, lng: 116.4074 },
+  싱가포르: { lat: 1.3521, lng: 103.8198 },
+  말레이시아: { lat: 3.1390, lng: 101.6869 },
+  아일랜드: { lat: 53.3498, lng: -6.2603 },
 };
 
 const iconButtonStyle: React.CSSProperties = {
@@ -24,6 +32,7 @@ export default function App() {
   const [selectedService, setSelectedService] = useState<any>(null);
   const [countries, setCountries] = useState<any[]>([]);
   const [kakaomobilityRaw, setKakaomobilityRaw] = useState<any>(null);
+  const [temuRaw, setTemuRaw] = useState<any>(null);
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
   useEffect(() => {
@@ -53,6 +62,14 @@ export default function App() {
       .then((res) => res.json())
       .then(setKakaomobilityRaw)
       .catch(() => setKakaomobilityRaw(null));
+  }, []);
+
+  // data/services/temu.json - 실제 브라우저로 방문해 수기로 옮긴 위탁/국외이전 표 (미검증 초안, service.verificationStatus 참고)
+  useEffect(() => {
+    fetch('/data/temu.json')
+      .then((res) => res.json())
+      .then(setTemuRaw)
+      .catch(() => setTemuRaw(null));
   }, []);
 
   const globeMaterial = useMemo(() => {
@@ -124,6 +141,70 @@ export default function App() {
     };
   }, [kakaomobilityRaw]);
 
+  // 실제 처리방침 표(data/services/temu.json)에서 뽑은 테무 서비스 노드
+  // Temu는 위탁/국외이전을 하나의 표로 통합 공시하므로, 국가별로 집계해서 표시한다
+  // (봇 탐지 때문에 자동 파싱이 아니라 수기로 옮긴 미검증 초안 - service.verificationStatus 참고)
+  const temuService = useMemo(() => {
+    if (!temuRaw) return null;
+
+    const meNode = { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' };
+    const collectorNode = { id: 'temu-hq', name: 'Temu', lat: 36.0, lng: 130.0, altitude: 0.2, logo: 'T', color: '#FF6600' };
+
+    const allRecipients = temuRaw.consignmentAndOverseasTransfer.flatMap((c: any) =>
+      c.recipients.map((r: any) => ({ ...r, category: c.category }))
+    );
+
+    const domesticCount = allRecipients.filter((r: any) => r.country === '한국').length;
+    const domesticNode = {
+      id: 'temu-domestic', name: `국내 수신처 ${domesticCount}곳`,
+      lat: 33.0, lng: 132.5, altitude: 0.35, logo: '🏢', color: '#64748b',
+    };
+
+    // 국가별 집계 (한 업체가 여러 국가에 걸치면 - 예: TikTok "미국, 싱가포르, 말레이시아, 아일랜드" - 각 국가에 한 번씩 집계)
+    const overseasCounts = new Map<string, number>();
+    for (const r of allRecipients) {
+      const countryList: string[] = r.country.split(',').map((c: string) => c.trim()).filter((c: string) => c !== '한국');
+      for (const country of countryList) {
+        overseasCounts.set(country, (overseasCounts.get(country) || 0) + 1);
+      }
+    }
+
+    const overseasPalette = ['#ef4444', '#f59e0b', '#8b5cf6', '#06b6d4', '#10b981', '#ec4899', '#eab308', '#3b82f6'];
+    const overseasNodes = Array.from(overseasCounts.entries()).map(([country, count], idx) => {
+      const base = COUNTRY_COORDS[country] || { lat: 0, lng: 0 };
+      return {
+        id: `temu-overseas-${idx}`, name: `${country} (${count}건)`,
+        lat: base.lat, lng: base.lng, altitude: 0.4 + idx * 0.03,
+        logo: '🌐', color: overseasPalette[idx % overseasPalette.length],
+      };
+    });
+
+    const nodes = [meNode, collectorNode, domesticNode, ...overseasNodes];
+    const arcs = [
+      { startLat: meNode.lat, startLng: meNode.lng, endLat: collectorNode.lat, endLng: collectorNode.lng, color: '#FF6600' },
+      { startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: domesticNode.lat, endLng: domesticNode.lng, color: '#64748b' },
+      ...overseasNodes.map((n: any) => ({
+        startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: n.lat, endLng: n.lng, color: n.color,
+      })),
+    ];
+
+    const chain = [
+      { node: '나', type: '정보주체', desc: '계정정보·주문정보·결제정보·배송주소·개인통관고유부호 등' },
+      { node: 'Temu', type: '1차 수집', desc: `위탁·국외이전 ${temuRaw.consignmentAndOverseasTransfer.length}개 구분 공시 (data/services/temu.json 참고)` },
+      ...temuRaw.consignmentAndOverseasTransfer.map((c: any) => ({
+        node: `${c.category} (${c.recipients.length}곳)`,
+        type: c.recipients.some((r: any) => r.country !== '한국') ? '위탁·국외이전' : '위탁',
+        desc: `${c.items} · ${c.purpose}`,
+      })),
+    ];
+
+    return {
+      id: 'temu', name: 'temu.com', korName: '테무 (Temu)', logo: 'T', color: '#FF6600',
+      date: `${temuRaw.service.retrievedAt} 수기 확인`, lastUse: '원문 참고 (policyUrl)', retention: '미검증 초안 (상세 참고)', risk: '높음',
+      nodes, arcs, chain,
+    };
+  }, [temuRaw]);
+
   // 시안에 맞춘 서비스 및 3D 공간 노드 데이터
   const mockServices = [
     {
@@ -149,31 +230,11 @@ export default function App() {
         { node: '메가존 클라우드', type: '재위탁', desc: '데이터 관리 파트너' },
         { node: '외 3개', type: '제3자', desc: '통계 분석 및 마케팅 연동' }
       ]
-    },
-    {
-      id: 'temu', name: 'temu.com', korName: '테무', logo: '🛒', color: '#FF6600',
-      date: '2024. 01. 15', lastUse: '2024. 05. 22', retention: '탈퇴 시까지', risk: '높음',
-      nodes: [
-        { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' },
-        { id: 's1', name: 'PDD Holdings', lat: 31.2, lng: 121.4, altitude: 0.3, logo: '🛒', color: '#FF6600' },
-        { id: 's2', name: '중국 물류사', lat: 25.0, lng: 115.0, altitude: 0.5, logo: '📦', color: '#ef4444' },
-        { id: 's3', name: '광고 네트워크', lat: 18.0, lng: 105.0, altitude: 0.7, logo: '📢', color: '#dc2626' }
-      ],
-      arcs: [
-        { startLat: 37.5, startLng: 127.0, endLat: 31.2, endLng: 121.4, color: '#FF6600' },
-        { startLat: 31.2, startLng: 121.4, endLat: 25.0, endLng: 115.0, color: '#ef4444' },
-        { startLat: 25.0, startLng: 115.0, endLat: 18.0, endLng: 105.0, color: '#dc2626' }
-      ],
-      chain: [
-        { node: '나', type: '정보주체', desc: '배송지 주소, 카드 정보' },
-        { node: 'PDD Holdings', type: '국외이전', desc: '상하이 본사 서버 전송' },
-        { node: '중국 물류사', type: '제3자', desc: '현지 통관 및 배송 공유' },
-        { node: '광고 네트워크', type: '제3자', desc: '행태정보 수집' }
-      ]
     }
   ];
 
-  const networkServices = kakaomobilityService ? [...mockServices, kakaomobilityService] : mockServices;
+  const realServices = [kakaomobilityService, temuService].filter(Boolean);
+  const networkServices = [...mockServices, ...realServices];
 
   // 메인 화면에 띄울 기본 아이콘들 ('나'를 중심으로 개인정보가 각 서비스로 흘러나가는 모습)
   const activeElements = selectedService ? selectedService.nodes : [

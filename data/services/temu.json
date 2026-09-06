@@ -1,0 +1,207 @@
+{
+  "service": {
+    "id": "temu",
+    "name": "테무 (Temu)",
+    "policyUrl": "https://www.temu.com/kr/privacy-and-cookie-policy.html",
+    "consignmentSourceUrl": "https://www.temu.com/kr/common-policy.html?policy=delegation_of_personal_info_processing",
+    "retrievedAt": "2026-09-06",
+    "retrievalMethod": "자동 스크래핑 아님. Temu 사이트에 봇 탐지가 걸려 있어(curl 등 스크립트로는 난독화된 JS 챌린지만 반환됨) 실제 브라우저로 방문해 화면에 보이는 표를 수기로 옮겨 적음.",
+    "verificationStatus": "미검증 초안. (1) 국내 제3자 제공 표(third_party_provision_of_personal_info)는 사이트 라우팅이 불안정해 이번 세션에서 확보하지 못했음 — thirdPartyProvision이 비어있는 건 '제공 대상 없음'이 아니라 '미확보'를 뜻함. (2) 아래 각 구분(category)의 transferredAt/retentionPeriod는 원문 표의 병합 셀 구조상 특정 항목에 정확히 귀속시키기 어려워 확인되지 않은 곳은 null로 남김. 게시 전 원문(policyUrl 하위 링크) 재확인 필요."
+  },
+  "consignment": [],
+  "thirdPartyProvision": [],
+  "overseasTransfer": [],
+  "consignmentAndOverseasTransfer": [
+    {
+      "category": "이메일",
+      "recipients": [
+        { "name": "Sendgrid", "contact": "privacy@twilio.com", "country": "미국" },
+        { "name": "Messagebird", "contact": "privacy@bird.com", "country": "미국" },
+        { "name": "Oracle", "contact": "privacy_kr_grp@oracle.com", "country": "미국" },
+        { "name": "Mailgun", "contact": "privacy@mailgun.com", "country": "미국" }
+      ],
+      "items": "이메일",
+      "purpose": "이메일 발송",
+      "transferredAt": "업무상 개인정보가 필요한 경우 보안망을 통해 이전",
+      "retentionPeriod": "계약 종료 시 파기"
+    },
+    {
+      "category": "SMS(문자 메세지)",
+      "recipients": [
+        { "name": "Sinch", "contact": "DPO@sinch.com", "country": "호주" },
+        { "name": "infobip", "contact": "data-protection-officer@infobip.com", "country": "미국" },
+        { "name": "SK Telink", "contact": "sktelinkprivacy@sk.com", "country": "한국" }
+      ],
+      "items": "전화번호",
+      "purpose": "SMS(문자 메시지)",
+      "transferredAt": null,
+      "retentionPeriod": null
+    },
+    {
+      "category": "앱 푸시 알림",
+      "recipients": [
+        { "name": "Apple", "contact": "apple.com/kr/privacy/contact", "country": "미국" },
+        { "name": "Google Android", "contact": "개인정보 보호 관련 문의양식 (support.google.com)", "country": "미국" }
+      ],
+      "items": "기기 정보",
+      "purpose": "앱 푸시 알림",
+      "transferredAt": null,
+      "retentionPeriod": null
+    },
+    {
+      "category": "광고",
+      "recipients": [
+        { "name": "Meta", "contact": "korealocalagent@support.facebook.com", "country": "미국" },
+        { "name": "Kakao", "contact": "contact_ads@kakaocorp.com", "country": "한국" },
+        { "name": "Naver", "contact": "네이버 고객센터", "country": "한국" },
+        { "name": "Danggeun", "contact": "privacy@daangnservice.com", "country": "한국" },
+        { "name": "TikTok", "contact": "tiktok.com/legal/report/privacy", "country": "미국, 싱가포르, 말레이시아, 아일랜드" }
+      ],
+      "items": "기기 정보, 서비스 이용 정보",
+      "purpose": "광고",
+      "transferredAt": null,
+      "retentionPeriod": null
+    },
+    {
+      "category": "광고 (입찰 응답 정보 포함)",
+      "recipients": [
+        { "name": "Adforus", "contact": "jun@adforus.co.kr", "country": "한국" },
+        { "name": "Pubeasy", "contact": "support@mvb-online.com", "country": "미국, 싱가포르" }
+      ],
+      "items": "기기 정보, 입찰 응답 정보",
+      "purpose": "광고",
+      "transferredAt": null,
+      "retentionPeriod": null
+    },
+    {
+      "category": "광고 (서비스 이용 및 입찰 응답 정보 포함)",
+      "recipients": [
+        { "name": "Google Ads", "contact": "개인정보 보호 관련 문의양식 (support.google.com)", "country": "미국" },
+        { "name": "Vungle", "contact": "dpo@liftoff.io", "country": "미국" },
+        { "name": "Apple", "contact": "apple.com/kr/privacy/contact", "country": "미국" }
+      ],
+      "items": "기기 정보, 서비스 이용 정보, 입찰 응답 정보",
+      "purpose": "광고",
+      "transferredAt": null,
+      "retentionPeriod": null
+    },
+    {
+      "category": "결제",
+      "recipients": [
+        { "name": "Apple Pay", "contact": "apple.com/kr/privacy/contact", "country": "미국" },
+        { "name": "Google Pay", "contact": "개인정보 보호 관련 문의양식 (support.google.com)", "country": "미국" },
+        { "name": "Paypal", "contact": "paypal@generalagent.co.kr", "country": "미국" }
+      ],
+      "items": "이름, 배송지 주소, 거래금액, 통화",
+      "purpose": "결제 처리",
+      "transferredAt": null,
+      "retentionPeriod": null
+    },
+    {
+      "category": "결제 (카드정보 포함)",
+      "recipients": [
+        { "name": "Adyen", "contact": "dpo@adyen.com", "country": "네덜란드" },
+        { "name": "Stripe", "contact": "dpo@stripe.com", "country": "미국" },
+        { "name": "Alipay", "contact": "AlipayConnectPrivacy@alipayplus.com", "country": "싱가포르" },
+        { "name": "Smartro", "contact": "hison@smartro.co.kr", "country": "한국" },
+        { "name": "Nuvei", "contact": "DPO@nuvei.com", "country": "영국" }
+      ],
+      "items": "이름, 배송지 주소, 거래금액, 통화, 카드 정보, 연락처 정보",
+      "purpose": "결제 처리",
+      "transferredAt": null,
+      "retentionPeriod": null
+    },
+    {
+      "category": "결제 보안",
+      "recipients": [
+        { "name": "Forter", "contact": "privacy@forter.com", "country": "미국" },
+        { "name": "Cybersource", "contact": "privacy@visa.com", "country": "미국" },
+        { "name": "Riskified", "contact": "privacy@riskified.com", "country": "미국" }
+      ],
+      "items": "기기 정보",
+      "purpose": "결제 보안",
+      "transferredAt": null,
+      "retentionPeriod": null
+    },
+    {
+      "category": "물류 (통관 포함)",
+      "recipients": [
+        { "name": "YDH International Logistics Korea Co. Ltd.", "contact": "ydhkr789@naver.com", "country": "싱가포르" },
+        { "name": "Tonda Global Logistics Co., Ltd.", "contact": "kr44528661@gmail.com", "country": "싱가포르" },
+        { "name": "HANJIN GLOBAL LOGISTICS SINGAPORE PTE. LTD.", "contact": "privacy@hanjin.com", "country": "싱가포르" },
+        { "name": "씨제이대한통운 주식회사", "contact": "privacy_cjl@cj.net", "country": "한국" },
+        { "name": "TAOPI KOREA CO., LTD", "contact": "joyce.yao@topworld-korea.kr", "country": "한국" },
+        { "name": "HYUNDAI GLOVIS CO., LTD", "contact": "privacy@glovis.net", "country": "한국" },
+        { "name": "DARAE INTERNATIONAL CO., LTD", "contact": "darae1168@naver.com", "country": "한국" },
+        { "name": "A.C.E Express, Inc.", "contact": "https://www.acex.co.kr/", "country": "한국" },
+        { "name": "Shanghai Yucan Information Technology Co., Ltd. 및 그 자회사들", "contact": "privacy@yucanxinxi.com", "country": "중국" }
+      ],
+      "items": "구매자 및 수령인 성함, 휴대폰 번호, 배송지 주소(우편번호 포함), 개인통관고유부호 또는 일회용 개인통관고유부호, 통관용 일회용 인증번호, 운송장 번호, 주문 번호",
+      "purpose": "제품 배송, 한국에서의 통관",
+      "transferredAt": null,
+      "retentionPeriod": null
+    },
+    {
+      "category": "물류 (배송)",
+      "recipients": [
+        { "name": "경동물류 주식회사", "contact": "nkim0229@kdexp.com", "country": "한국" },
+        { "name": "롯데글로벌로지스 주식회사", "contact": "lgl-privacy@lotte.net", "country": "한국" },
+        { "name": "RUNHENGFENG INTERNATIONAL TRADE CO., LTD", "contact": "privacy@yunda.kr", "country": "한국" }
+      ],
+      "items": "배송지 주소(우편번호 포함), 이름, 전화번호",
+      "purpose": "제품 배송",
+      "transferredAt": null,
+      "retentionPeriod": null
+    },
+    {
+      "category": "클라우드 서버",
+      "recipients": [
+        { "name": "Microsoft Azure", "contact": "Mskoreaprivacy@generalagent.co.kr", "country": "미국" }
+      ],
+      "items": "사용자 사용 중 수집된 데이터",
+      "purpose": "데이터 저장, 시스템 개발 및 운영",
+      "transferredAt": null,
+      "retentionPeriod": null
+    },
+    {
+      "category": "서비스 유지보수 및 통관",
+      "recipients": [
+        { "name": "Shanghai Congjing Information Technology Co., Ltd.", "contact": "privacy@congjingxinxi.com", "country": "중국" }
+      ],
+      "items": "사용자 사용 중 수집된 데이터, 이름, 전화번호, 개인통관고유부호",
+      "purpose": "문제 해결, 법률 및 규정 준수 (한국에서의 통관)",
+      "transferredAt": null,
+      "retentionPeriod": null
+    },
+    {
+      "category": "연령 확인",
+      "recipients": [
+        { "name": "Danal", "contact": "help@danal.co.kr", "country": "한국" }
+      ],
+      "items": "요청 ID",
+      "purpose": "연령 확인",
+      "transferredAt": null,
+      "retentionPeriod": null
+    },
+    {
+      "category": "통관 정보 일치 여부 확인",
+      "recipients": [
+        { "name": "NICE ID", "contact": "niceid_privacy@nice.co.kr", "country": "한국" }
+      ],
+      "items": "이름, 휴대폰 번호, 우편번호, 개인통관고유부호, 주문번호",
+      "purpose": "통관 정보 일치 여부 확인",
+      "transferredAt": null,
+      "retentionPeriod": null
+    },
+    {
+      "category": "고객 서비스",
+      "recipients": [
+        { "name": "Concentrix Services", "contact": "DPO@concentrix.com", "country": "한국" }
+      ],
+      "items": "이름, 주소, 주문 정보, 연락처 정보, 통신 정보",
+      "purpose": "고객 서비스",
+      "transferredAt": null,
+      "retentionPeriod": null
+    }
+  ]
+}
