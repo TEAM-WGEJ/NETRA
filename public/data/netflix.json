@@ -1,0 +1,487 @@
+{
+  "service": {
+    "id": "netflix",
+    "name": "넷플릭스",
+    "policyUrl": "https://help.netflix.com/ko/legal/privacy",
+    "consignmentSourceUrl": "https://help.netflix.com/ko/legal/kr-entrustment-and-overseas-transfers",
+    "retrievedAt": "2026-09-06",
+    "retrievalMethod": "정적 HTML 자동 파싱 (pipeline/extract_netflix.py). 한국 이용자 대상 위탁·국외이전 전용 페이지를 사용.",
+    "notes": "한 수탁사가 여러 국가로 이전하는 경우가 많아 country는 원문 문자열 그대로 두고 countries에 괄호 밖 쉼표 기준으로 나눈 목록을 함께 담았다(파생 필드). 국내 위탁 3건(INICIS·KCP·UBASE)은 원문이 항목·보유기간을 '-'로 비워두어 null이다. transferType은 schema.json 밖의 보조 필드."
+  },
+  "consignment": [
+    {
+      "task": "결제 처리 및 성인 인증",
+      "consignee": "INICIS",
+      "retentionPeriod": null
+    },
+    {
+      "task": "결제 처리",
+      "consignee": "KCP",
+      "retentionPeriod": null
+    },
+    {
+      "task": "고객 센터 지원",
+      "consignee": "UBASE",
+      "retentionPeriod": null
+    }
+  ],
+  "thirdPartyProvision": [
+    {
+      "recipient": "Netflix, Inc.",
+      "purpose": "글로벌 서비스 제공 개발 및 개선, 콘텐츠 개발, 보안 기능 관리, 현지 법령 및 규제 준수",
+      "items": "개인정보 처리방침에 열거되어 있는 개인정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안"
+    }
+  ],
+  "overseasTransfer": [
+    {
+      "country": "미국",
+      "countries": [
+        "미국"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "Netflix, Inc.",
+      "contact": null,
+      "purposeAndItems": "글로벌 서비스 제공 개발 및 개선, 콘텐츠 개발, 보안 기능 관리, 현지 법령 및 규제 준수 / 개인정보 처리방침에 열거되어 있는 개인정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "제3자 제공"
+    },
+    {
+      "country": "미국, 아일랜드",
+      "countries": [
+        "미국",
+        "아일랜드"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "Amazon Web Services(AWS)",
+      "contact": null,
+      "purposeAndItems": "기반시설 및 IT 업무 / 개인정보 처리방침에 열거되어 있는 개인정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국, 칠레, 벨기에, 덴마크, 핀란드, 아일랜드, 네덜란드, 싱가포르, 대만",
+      "countries": [
+        "미국",
+        "칠레",
+        "벨기에",
+        "덴마크",
+        "핀란드",
+        "아일랜드",
+        "네덜란드",
+        "싱가포르",
+        "대만"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "Google(reCaptcha)",
+      "contact": null,
+      "purposeAndItems": "보안 및 사기 방지 / 브라우저 정보, 디바이스 정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국, 벨기에, 칠레, 덴마크, 핀란드, 아일랜드, 네덜란드, 싱가포르, 대만",
+      "countries": [
+        "미국",
+        "벨기에",
+        "칠레",
+        "덴마크",
+        "핀란드",
+        "아일랜드",
+        "네덜란드",
+        "싱가포르",
+        "대만"
+      ],
+      "transferredAt": "목적 달성에 필요한 기간 동안 전자적 방법",
+      "recipient": "Google",
+      "contact": null,
+      "purposeAndItems": "식별자 일치 커뮤니케이션 / 개인정보 보호 식별자(자세한 정보는 이 고객 센터 문서 참조)",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국, 덴마크, 아일랜드, 싱가포르, 스웨덴",
+      "countries": [
+        "미국",
+        "덴마크",
+        "아일랜드",
+        "싱가포르",
+        "스웨덴"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "Meta",
+      "contact": null,
+      "purposeAndItems": "식별자 일치 커뮤니케이션 / 개인정보 보호 식별자(자세한 정보는 이 고객 센터 문서 참조)",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국, 아이슬란드(대체 작동 사이트, 기본 저장 사이트에 오류가 발생하는 경우 이용됨)",
+      "countries": [
+        "미국",
+        "아이슬란드(대체 작동 사이트, 기본 저장 사이트에 오류가 발생하는 경우 이용됨)"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "ThreatMetrix",
+      "contact": null,
+      "purposeAndItems": "보안 및 사기 방지 / 브라우저 정보, 디바이스 정보, 결제 관련 정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국",
+      "countries": [
+        "미국"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "Twilio",
+      "contact": null,
+      "purposeAndItems": "메시지 서비스 / 휴대폰 번호",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국, 스웨덴, 싱가포르",
+      "countries": [
+        "미국",
+        "스웨덴",
+        "싱가포르"
+      ],
+      "transferredAt": "서비스 이용 시 전자적 수단",
+      "recipient": "Sinch",
+      "contact": null,
+      "purposeAndItems": "메시지 서비스 / 휴대폰 번호",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국",
+      "countries": [
+        "미국"
+      ],
+      "transferredAt": "서비스 이용 시 전자적 수단",
+      "recipient": "Validity",
+      "contact": null,
+      "purposeAndItems": "이메일 최적화 서비스 / 이름 / 이메일 주소",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국",
+      "countries": [
+        "미국"
+      ],
+      "transferredAt": "목적 달성에 필요한 기간 동안 전자적 방법",
+      "recipient": "Sprinklr",
+      "contact": null,
+      "purposeAndItems": "고객 센터 관리 플랫폼 / 개인정보 처리방침에 열거되어 있는 개인정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "호주, 브라질, 코스타리카, 필리핀, 싱가포르, 미국",
+      "countries": [
+        "호주",
+        "브라질",
+        "코스타리카",
+        "필리핀",
+        "싱가포르",
+        "미국"
+      ],
+      "transferredAt": "목적 달성에 필요한 기간 동안 전자적 방법",
+      "recipient": "Zendesk",
+      "contact": null,
+      "purposeAndItems": "고객 센터 지원 / 개인정보 처리방침에 열거되어 있는 개인정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국, 아일랜드, 싱가포르",
+      "countries": [
+        "미국",
+        "아일랜드",
+        "싱가포르"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "Tik Tok",
+      "contact": null,
+      "purposeAndItems": "내장된 미디어 재생 / 브라우저 정보, 디바이스 정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국, 아일랜드, 스웨덴, 덴마크, 싱가포르",
+      "countries": [
+        "미국",
+        "아일랜드",
+        "스웨덴",
+        "덴마크",
+        "싱가포르"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "Instagram",
+      "contact": null,
+      "purposeAndItems": "내장된 미디어 재생 / 브라우저 정보, 디바이스 정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국, 네덜란드, 벨기에",
+      "countries": [
+        "미국",
+        "네덜란드",
+        "벨기에"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "YouTube",
+      "contact": null,
+      "purposeAndItems": "내장된 미디어 재생 / 브라우저 정보, 디바이스 정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국, 칠레, 대만, 싱가포르, 아일랜드, 네덜란드, 덴마크, 핀란드, 벨기에",
+      "countries": [
+        "미국",
+        "칠레",
+        "대만",
+        "싱가포르",
+        "아일랜드",
+        "네덜란드",
+        "덴마크",
+        "핀란드",
+        "벨기에"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "Spotify",
+      "contact": null,
+      "purposeAndItems": "내장된 미디어 재생 / 브라우저 정보, 디바이스 정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국, 독일, 네덜란드, 캐나다",
+      "countries": [
+        "미국",
+        "독일",
+        "네덜란드",
+        "캐나다"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "SoundCloud",
+      "contact": null,
+      "purposeAndItems": "내장된 미디어 재생 / 브라우저 정보, 디바이스 정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "아일랜드, 미국",
+      "countries": [
+        "아일랜드",
+        "미국"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "Sketchfab",
+      "contact": null,
+      "purposeAndItems": "내장된 미디어 재생 / 브라우저 정보, 디바이스 정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국, 칠레, 대만, 싱가포르, 아일랜드, 네덜란드, 덴마크, 핀란드, 벨기에",
+      "countries": [
+        "미국",
+        "칠레",
+        "대만",
+        "싱가포르",
+        "아일랜드",
+        "네덜란드",
+        "덴마크",
+        "핀란드",
+        "벨기에"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "X",
+      "contact": null,
+      "purposeAndItems": "내장된 미디어 재생 / 브라우저 정보, 디바이스 정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국",
+      "countries": [
+        "미국"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "TwoHat",
+      "contact": null,
+      "purposeAndItems": "게임 채팅 모더레이션 서비스 / 모더레이션용 게임 채팅 콘텐츠",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국, 캐나다, 벨기에, 독일, 핀란드, 영국",
+      "countries": [
+        "미국",
+        "캐나다",
+        "벨기에",
+        "독일",
+        "핀란드",
+        "영국"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "Unity Technologies SF (DeltaDNA)",
+      "contact": null,
+      "purposeAndItems": "게임 애널리틱스 / 개인정보 처리방침에 열거되어 있는 개인정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국",
+      "countries": [
+        "미국"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "Chartbeat",
+      "contact": null,
+      "purposeAndItems": "웹 애널리틱스 / 브라우저 정보, 디바이스 정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "호주, 브라질, 캐나다, 프랑스, 독일, 인도, 이탈리아, 일본, 멕시코, 네덜란드, 싱가포르, 스페인, 영국, 미국",
+      "countries": [
+        "호주",
+        "브라질",
+        "캐나다",
+        "프랑스",
+        "독일",
+        "인도",
+        "이탈리아",
+        "일본",
+        "멕시코",
+        "네덜란드",
+        "싱가포르",
+        "스페인",
+        "영국",
+        "미국"
+      ],
+      "transferredAt": "서비스 목적을 위해 필요한 기간 동안 전자적 방법",
+      "recipient": "Netflix 그룹 기업*",
+      "contact": "privacy@netflix.com",
+      "purposeAndItems": "그룹 내 업무 처리 (서비스 액세스 제공 및 관리, 보안 기능 제공, 고객 지원, 귀하와의 커뮤니케이션, 제품 및 서비스 개선, 콘텐츠 개발, 법령 및 규제 준수, 당사 개인정보 처리방침 ‘Netflix가 개인정보를 이용하는 방식’ 항목에 기재되어 있는 기타 목적) / 개인정보 처리방침에 열거되어 있는 개인정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "벨기에, 아일랜드, 미국",
+      "countries": [
+        "벨기에",
+        "아일랜드",
+        "미국"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "AppsFlyer",
+      "contact": null,
+      "purposeAndItems": "디지털 광고 / 브라우저 정보, 디바이스 정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국",
+      "countries": [
+        "미국"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "DoubleVerify, Inc.",
+      "contact": null,
+      "purposeAndItems": "디지털 광고 / 개인정보 처리방침에 열거되어 있는 개인정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국",
+      "countries": [
+        "미국"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "Experian",
+      "contact": null,
+      "purposeAndItems": "디지털 광고 / 개인정보 처리방침에 열거되어 있는 개인정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국",
+      "countries": [
+        "미국"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "Integral Ad Science, Inc.",
+      "contact": null,
+      "purposeAndItems": "디지털 광고 / 개인정보 처리방침에 열거되어 있는 개인정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "호주, 브라질, 캐나다, 프랑스, 독일, 이탈리아, 일본, 멕시코, 네덜란드, 스페인, 영국, 미국",
+      "countries": [
+        "호주",
+        "브라질",
+        "캐나다",
+        "프랑스",
+        "독일",
+        "이탈리아",
+        "일본",
+        "멕시코",
+        "네덜란드",
+        "스페인",
+        "영국",
+        "미국"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "Xandr Inc.",
+      "contact": null,
+      "purposeAndItems": "디지털 광고 / 개인정보 처리방침에 열거되어 있는 개인정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국",
+      "countries": [
+        "미국"
+      ],
+      "transferredAt": "서비스 이용 시 전자적 수단",
+      "recipient": "Forsta",
+      "contact": null,
+      "purposeAndItems": "고객 리서치 / 개인정보 처리방침에 열거되어 있는 개인정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국",
+      "countries": [
+        "미국"
+      ],
+      "transferredAt": "서비스 이용 시 전자적 수단",
+      "recipient": "Ethnio",
+      "contact": null,
+      "purposeAndItems": "프로모션 관리 / 개인정보 처리방침에 열거되어 있는 개인정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    },
+    {
+      "country": "미국, 아일랜드",
+      "countries": [
+        "미국",
+        "아일랜드"
+      ],
+      "transferredAt": "목적을 위해 필요한 때 전자적 방법",
+      "recipient": "Boku Inc.",
+      "contact": null,
+      "purposeAndItems": "결제 처리 / 휴대폰 번호(MSISDN) / 결제 관련 정보",
+      "retentionPeriod": "목적 달성에 필요한 기간 동안",
+      "transferType": "처리위탁"
+    }
+  ]
+}
