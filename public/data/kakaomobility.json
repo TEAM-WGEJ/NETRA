@@ -1,0 +1,203 @@
+{
+  "service": {
+    "id": "kakaomobility",
+    "name": "카카오모빌리티",
+    "policyUrl": "https://policy.kakaomobility.com/ko/privacy_200702/3rd_party.html"
+  },
+  "consignment": [
+    {
+      "task": "고객센터 운영 및 고객상담, 서포터 인센티브 프로모션 운영관리, 서비스 가입 및 예약이용 상담, 보험처리를 위한 사고 접수 상담",
+      "consignee": "(주)케이앤웍스, (주)트랜스코스모스코리아",
+      "retentionPeriod": "회원탈퇴 시 혹은 위탁 계약 종료 시까지"
+    },
+    {
+      "task": "인프라 운영, 요금정산, 데이터 분석 및 통계화 처리",
+      "consignee": "(주)카카오",
+      "retentionPeriod": "회원탈퇴 시 혹은 위탁 계약 종료 시까지"
+    },
+    {
+      "task": "문자메세지(SMS, LMS) 발송",
+      "consignee": "엘지유플러스, 인포뱅크(주), 인포빕, 다우기술",
+      "retentionPeriod": "회원탈퇴 시 혹은 위탁 계약 종료 시까지"
+    },
+    {
+      "task": "안심번호 서비스 제공",
+      "consignee": "(주)카카오, SK브로드밴드(주), SK텔링크(주), 세종텔레콤(주)",
+      "retentionPeriod": "회원탈퇴 시 혹은 위탁 계약 종료 시까지"
+    },
+    {
+      "task": "결제서비스 제공",
+      "consignee": "(주)카카오페이, (주)다날, 세틀뱅크(주), 토스페이먼츠(주)",
+      "retentionPeriod": "회원탈퇴 시 혹은 위탁 계약 종료 시까지"
+    },
+    {
+      "task": "택시 및 블랙 기사 교육",
+      "consignee": "(주)트랜스코스모스코리아, 렉스아카데미",
+      "retentionPeriod": "회원탈퇴 시 혹은 위탁 계약 종료 시까지"
+    },
+    {
+      "task": "운전기사 채용 지원/상담 및 지원자 관리",
+      "consignee": "기사모집 대행사",
+      "retentionPeriod": "회원탈퇴 시 혹은 위탁 계약 종료 시까지"
+    },
+    {
+      "task": "주차 서비스 영업 및 문의 상담, 주차 예약 처리",
+      "consignee": "(주)파킹스퀘어",
+      "retentionPeriod": "회원탈퇴 시 혹은 위탁 계약 종료 시까지"
+    },
+    {
+      "task": "택시요금 정산 처리",
+      "consignee": "(주)티머니",
+      "retentionPeriod": "회원탈퇴 시 혹은 위탁 계약 종료 시까지"
+    },
+    {
+      "task": "본인확인",
+      "consignee": "(주)다날",
+      "retentionPeriod": "회원탈퇴 시 혹은 위탁 계약 종료 시까지"
+    },
+    {
+      "task": "상품 및 경품 등의 배송 서비스",
+      "consignee": "케이에스로지스(주)",
+      "retentionPeriod": "회원탈퇴 시 혹은 위탁 계약 종료 시까지"
+    },
+    {
+      "task": "보험 가입/갱신/접수 대행 및 운영전반(대리기사 및 카풀크루, 바이크)",
+      "consignee": "(주)에스아이엠지",
+      "retentionPeriod": "회원탈퇴 시 혹은 위탁 계약 종료 시까지"
+    },
+    {
+      "task": "카카오 T 비즈니스 가입 상담 및 고객 관리",
+      "consignee": "(주)투엘케이, (주)비이커뮤니케이션즈, (주)제이케이엘컴퍼니, (주)제이앤에이치홀딩스",
+      "retentionPeriod": "회원탈퇴 시 혹은 위탁 계약 종료 시까지"
+    },
+    {
+      "task": "주차영업대행",
+      "consignee": "(주)티에스넷, 에스원",
+      "retentionPeriod": "회원탈퇴 시 혹은 위탁 계약 종료 시까지"
+    },
+    {
+      "task": "주차시스템 유지관리",
+      "consignee": "(주)실리콘브릿지",
+      "retentionPeriod": "회원탈퇴 시 혹은 위탁 계약 종료 시까지"
+    },
+    {
+      "task": "대리운전기사 호출 서비스",
+      "consignee": "(주)CMNP",
+      "retentionPeriod": "회원탈퇴 시 혹은 위탁 계약 종료 시까지"
+    }
+  ],
+  "thirdPartyProvision": [
+    {
+      "recipient": "회원",
+      "purpose": "차량배차 및 탑승, 이용자 보호기능",
+      "items": "이름, 전화번호, 사진, 차량정보(차종, 차량번호)",
+      "retentionPeriod": "(배차) 운행종료 3일 후 마스킹, (보호기능) 서비스 종료시까지"
+    },
+    {
+      "recipient": "요금정산 주체",
+      "purpose": "영수증 발급 및 대금 지급",
+      "items": "이름, 차량번호",
+      "retentionPeriod": "관련 법령에 의거하여 5년 보관 후 파기"
+    },
+    {
+      "recipient": "한국카카오은행(주)",
+      "purpose": "여신거래와 관련한 금리 또는 여신한도 설정, 신용평가 및 신용리스크 관리정책 수립을 위한 데이터 분석",
+      "items": "카카오택시 최근 6개월 탑승정보(탑승횟수, 예상금액)",
+      "retentionPeriod": "금융거래 종료일로부터 5년 후 파기"
+    },
+    {
+      "recipient": "(주)티머니",
+      "purpose": "티머니 가맹 여부 확인",
+      "items": "차량번호",
+      "retentionPeriod": "가맹 확인 후 즉시 파기"
+    },
+    {
+      "recipient": "(주)케이엠솔루션, (주)디지티모빌리티, (주)에스앤티솔루션, (주)애니콜모빌리티, (주)디에이치모빌리티, (주)지제이티모빌리티, (주)블랙핀, 가맹점",
+      "purpose": "제휴서비스 이용 및 기사 관리",
+      "items": "이름, 전화번호",
+      "retentionPeriod": "회원 탈퇴 시 혹은 서비스 종료 시까지"
+    },
+    {
+      "recipient": "서울특별시청",
+      "purpose": "여객자동차운송사업 개선명령 및 준수사항 이행",
+      "items": "차량정보, 택시자격번호",
+      "retentionPeriod": "약관에 따라 5년 보관"
+    },
+    {
+      "recipient": "(주)CMNP",
+      "purpose": "사고 보험 접수 및 처리",
+      "items": "카카오 계정, 이름, 전화번호, 보험정보(카카오 T 대리 보험기사의 경우 보험회사, 보험증권번호)",
+      "retentionPeriod": "사고처리 완료 후 즉시 파기"
+    },
+    {
+      "recipient": "보험사(DB손해보험, KB손해보험, 메리츠화재 중 해당 보험사)",
+      "purpose": "보험 가입 및 심사(대리기사 및 카풀크루, 바이크)",
+      "items": "이름, 식별ID, 전화번호, 생년월일, 차량번호",
+      "retentionPeriod": "금융거래 종료일로부터 5년 후 파기"
+    },
+    {
+      "recipient": "제휴주차장",
+      "purpose": "사전 예약 및 결제 정산",
+      "items": "차량번호",
+      "retentionPeriod": "서비스 종료 시까지"
+    },
+    {
+      "recipient": "(주)엘지유플러스",
+      "purpose": "서비스 품질 개선 및 통계 분석/활용, 즐겨찾기 정보 이관",
+      "items": "서비스 이용 로그수집 데이터, 무선 네트워크 서비스 상태 정보, 휴대폰번호, 휴대폰 단말기 정보 등",
+      "retentionPeriod": "제공 시점으로부터 1개월 이내 파기"
+    },
+    {
+      "recipient": "신한은행, 금융결제원",
+      "purpose": "CMS자동이체",
+      "items": "예금주명, 신청계좌, 거래은행명, 계좌번호, 주민등록번호",
+      "retentionPeriod": "금융거래 종료일로부터 5년 후 파기"
+    },
+    {
+      "recipient": "(주)에스원",
+      "purpose": "무인주차운영 및 긴급 대응 서비스",
+      "items": "성명, 휴대전화번호, 은행명, 계좌주, 계좌번호",
+      "retentionPeriod": "회원탈퇴 시 혹은 서비스 종료 시 까지"
+    },
+    {
+      "recipient": "(주)CMNP, 대리점",
+      "purpose": "소득세법 제145조에 의거한 원천세 처리",
+      "items": "대리기사 성명, 주민등록번호",
+      "retentionPeriod": "국세기본법 제85조의3에 의거하여 5년간 보관 후 파기"
+    }
+  ],
+  "overseasTransfer": [
+    {
+      "country": "일본",
+      "transferredAt": "2018년 12월 6일 / 서비스 이용 시점에 네트워크를 통한 전송",
+      "recipient": "JapanTaxi株式会社",
+      "contact": "上山 純一 / junichi.ueyama @japantaxi.co.jp",
+      "purposeAndItems": "차량배차 / 탑승위치",
+      "retentionPeriod": "서비스 이용일로부터 12개월 후 파기"
+    },
+    {
+      "country": "벨기에",
+      "transferredAt": "2019년 10월 16일 / 서비스 이용 시점에 네트워크를 통한 전송",
+      "recipient": "Splyt",
+      "contact": "Stephen Mason / hello@justsplyt.com",
+      "purposeAndItems": "차량배차 / 이름, 핸드폰번호, 탑승위치",
+      "retentionPeriod": "서비스 이용일로부터 12개월 후 파기"
+    },
+    {
+      "country": "베트남",
+      "transferredAt": "2019년 10월 16일 / 서비스 이용 시점에 네트워크를 통한 전송",
+      "recipient": "Grab",
+      "contact": "Sam Pant / sam.pant@grab.com",
+      "purposeAndItems": "차량배차 / 이름, 탑승위치",
+      "retentionPeriod": "서비스 이용일로부터 12개월 후 파기"
+    },
+    {
+      "country": "베트남",
+      "transferredAt": "2020년 1월 15일 / 서비스 이용 시점에 네트워크를 통한 전송",
+      "recipient": "롯데렌탈(주) 베트남법인",
+      "contact": "정수진 / jung.sujin@lotte.net",
+      "purposeAndItems": "배차 진행 및 CS 운영 / 이름, 전화번호, 예약정보(예약번호, 출도착지, 예약일시, 비행편명)",
+      "retentionPeriod": "서비스 종료 시 지체없이 파기(단, 약관 및 관련 법률에 의한 보존이 필요한 경우 해당 기간 만큼 보관)"
+    }
+  ]
+}

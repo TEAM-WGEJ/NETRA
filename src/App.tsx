@@ -5,6 +5,14 @@ import { Plus, Minus, RotateCcw } from 'lucide-react';
 
 const INITIAL_VIEW = { lat: 20, lng: 126, altitude: 2.2 };
 
+// data/services/*.json 의 국외이전 국가명 -> 대략적인 국가 중심 좌표
+// (원문 공시는 국가명 단위까지만 밝히므로, 그 이상의 정밀도는 임의로 만들지 않는다)
+const COUNTRY_COORDS: Record<string, { lat: number; lng: number }> = {
+  일본: { lat: 35.6762, lng: 139.6503 },
+  벨기에: { lat: 50.8503, lng: 4.3517 },
+  베트남: { lat: 21.0278, lng: 105.8342 },
+};
+
 const iconButtonStyle: React.CSSProperties = {
   width: '38px', height: '38px', background: '#fff', borderRadius: '50%',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -15,6 +23,7 @@ export default function App() {
   const globeEl = useRef<any>(null);
   const [selectedService, setSelectedService] = useState<any>(null);
   const [countries, setCountries] = useState<any[]>([]);
+  const [kakaomobilityRaw, setKakaomobilityRaw] = useState<any>(null);
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
   useEffect(() => {
@@ -38,6 +47,14 @@ export default function App() {
       .catch(() => setCountries([]));
   }, []);
 
+  // pipeline/extract_kakaomobility.py 로 실제 처리방침 표에서 뽑아낸 데이터
+  useEffect(() => {
+    fetch('/data/kakaomobility.json')
+      .then((res) => res.json())
+      .then(setKakaomobilityRaw)
+      .catch(() => setKakaomobilityRaw(null));
+  }, []);
+
   const globeMaterial = useMemo(() => {
     return new THREE.MeshPhongMaterial({
       color: '#bfe3ff',
@@ -58,8 +75,57 @@ export default function App() {
     globeEl.current?.pointOfView(INITIAL_VIEW, 800);
   };
 
+  // 실제 처리방침 표(data/services/kakaomobility.json)에서 뽑은 카카오모빌리티 서비스 노드
+  // 국외이전 4건은 원문 그대로의 국가/업체/목적/보유기간을 사용하고,
+  // 국내 위탁·제3자제공은 개별 주소가 공시되지 않으므로 임의 좌표를 만들지 않고 집계 노드로만 표현한다.
+  const kakaomobilityService = useMemo(() => {
+    if (!kakaomobilityRaw) return null;
+
+    const meNode = { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' };
+    const collectorNode = { id: 'kakaomobility-hq', name: '카카오모빌리티', lat: 37.5, lng: 129.5, altitude: 0.2, logo: 'K', color: '#000000' };
+    const consignmentNode = {
+      id: 'kakaomobility-consignment', name: `국내 수탁사 ${kakaomobilityRaw.consignment.length}곳`,
+      lat: 34.5, lng: 132.0, altitude: 0.35, logo: '🏢', color: '#64748b'
+    };
+    const overseasPalette = ['#ef4444', '#f59e0b', '#8b5cf6', '#06b6d4'];
+    const overseasNodes = kakaomobilityRaw.overseasTransfer.map((t: any, idx: number) => {
+      const base = COUNTRY_COORDS[t.country] || { lat: 0, lng: 0 };
+      return {
+        id: `kakaomobility-overseas-${idx}`,
+        name: `${t.recipient} (${t.country})`,
+        // 같은 국가로 이전되는 업체가 둘 이상이면 지구본 위에서 겹치지 않도록 살짝 띄운다 (표시상의 구분일 뿐 실제 좌표 아님)
+        lat: base.lat, lng: base.lng + idx * 1.2,
+        altitude: 0.4 + idx * 0.05, logo: '🌐', color: overseasPalette[idx % overseasPalette.length],
+        detail: t,
+      };
+    });
+
+    const nodes = [meNode, collectorNode, consignmentNode, ...overseasNodes];
+    const arcs = [
+      { startLat: meNode.lat, startLng: meNode.lng, endLat: collectorNode.lat, endLng: collectorNode.lng, color: '#000000' },
+      { startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: consignmentNode.lat, endLng: consignmentNode.lng, color: '#64748b' },
+      ...overseasNodes.map((n: any) => ({
+        startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: n.lat, endLng: n.lng, color: n.color,
+      })),
+    ];
+    const chain = [
+      { node: '나', type: '정보주체', desc: '카카오T 등 이용 시 제공한 이름·전화번호·차량정보 등' },
+      { node: '카카오모빌리티', type: '1차 수집', desc: `제3자 제공 ${kakaomobilityRaw.thirdPartyProvision.length}건 공시 (배차·결제·안심번호 등 서비스 운영)` },
+      { node: consignmentNode.name, type: '위탁', desc: '고객센터 운영, 인프라, SMS발송, 결제대행 등 (data/services/kakaomobility.json 참고)' },
+      ...kakaomobilityRaw.overseasTransfer.map((t: any) => ({
+        node: `${t.recipient} (${t.country})`, type: '국외이전', desc: `${t.purposeAndItems} · ${t.retentionPeriod}`,
+      })),
+    ];
+
+    return {
+      id: 'kakaomobility', name: 'kakaomobility.com', korName: '카카오모빌리티', logo: 'K', color: '#000000',
+      date: '2020.06.11 공시', lastUse: '원문 참고 (policyUrl)', retention: '표별로 상이 (상세 참고)', risk: '높음',
+      nodes, arcs, chain,
+    };
+  }, [kakaomobilityRaw]);
+
   // 시안에 맞춘 서비스 및 3D 공간 노드 데이터
-  const networkServices = [
+  const mockServices = [
     {
       id: 'naver', name: 'naver.com', korName: '네이버', logo: 'N', color: '#03C75A',
       date: '2022. 03. 15', lastUse: '2024. 05. 20', retention: '2년 3개월', risk: '보통',
@@ -107,13 +173,16 @@ export default function App() {
     }
   ];
 
+  const networkServices = kakaomobilityService ? [...mockServices, kakaomobilityService] : mockServices;
+
   // 메인 화면에 띄울 기본 아이콘들 ('나'를 중심으로 개인정보가 각 서비스로 흘러나가는 모습)
   const activeElements = selectedService ? selectedService.nodes : [
     { id: 'me', name: '나', lat: 36.5, lng: 127.5, altitude: 0.05, logo: '👤', color: '#3b82f6' },
     { id: 'naver', name: '네이버', lat: 37.5, lng: 129.0, altitude: 0.2, logo: 'N', color: '#03C75A' },
     { id: 'insta', name: '인스타그램', lat: 25.0, lng: 110.0, altitude: 0.3, logo: '📷', color: '#E1306C' },
     { id: 'temu', name: '테무', lat: 45.0, lng: 140.0, altitude: 0.25, logo: '🛒', color: '#FF6600' },
-    { id: 'cloud', name: '클라우드', lat: 15.0, lng: 135.0, altitude: 0.35, logo: '☁️', color: '#0284c7' }
+    { id: 'cloud', name: '클라우드', lat: 15.0, lng: 135.0, altitude: 0.35, logo: '☁️', color: '#0284c7' },
+    { id: 'kakaomobility', name: '카카오모빌리티', lat: 33.5, lng: 128.5, altitude: 0.4, logo: 'K', color: '#000000' }
   ];
 
   // 기본 상태의 arc는 '나'로부터 각 서비스로 개인정보가 흘러나가는 방향을 표현 (dash 애니메이션이 흐름 방향을 보여줌)

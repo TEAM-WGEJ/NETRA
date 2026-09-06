@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "NETRA Service Record",
+  "description": "하나의 서비스(플랫폼)가 개인정보처리방침을 통해 공시한 위탁·제3자 제공·국외이전 현황",
+  "type": "object",
+  "required": ["service", "consignment", "thirdPartyProvision", "overseasTransfer"],
+  "properties": {
+    "service": {
+      "type": "object",
+      "required": ["id", "name", "policyUrl"],
+      "properties": {
+        "id": { "type": "string", "description": "서비스 식별자 (파일명과 동일)" },
+        "name": { "type": "string", "description": "서비스명" },
+        "policyUrl": { "type": "string", "format": "uri", "description": "원문 처리방침 URL" }
+      }
+    },
+    "consignment": {
+      "type": "array",
+      "description": "개인정보 처리 위탁 현황 (개인정보 보호법 제26조)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "task": { "type": "string", "description": "위탁 업무 내용" },
+          "consignee": { "type": "string", "description": "수탁사" },
+          "retentionPeriod": { "type": "string", "description": "개인정보의 보유 및 이용기간" }
+        }
+      }
+    },
+    "thirdPartyProvision": {
+      "type": "array",
+      "description": "개인정보 제3자 제공 현황 (개인정보 보호법 제17조)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "recipient": { "type": "string", "description": "제공받는 대상" },
+          "purpose": { "type": "string", "description": "제공 목적" },
+          "items": { "type": "string", "description": "제공 정보(항목)" },
+          "retentionPeriod": { "type": "string", "description": "제공받는 자의 보유기간" }
+        }
+      }
+    },
+    "overseasTransfer": {
+      "type": "array",
+      "description": "개인정보 국외이전 현황 (개인정보 보호법 제28조의8)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "country": { "type": "string", "description": "이전되는 국가" },
+          "transferredAt": { "type": "string", "description": "이전일시 및 이전방법" },
+          "recipient": { "type": "string", "description": "이전받는 대상" },
+          "contact": { "type": "string", "description": "정보관리책임자의 연락처" },
+          "purposeAndItems": { "type": "string", "description": "이전목적 및 이전정보 항목" },
+          "retentionPeriod": { "type": "string", "description": "이전받는 자의 개인정보 보유기간" }
+        }
+      }
+    }
+  }
+}
