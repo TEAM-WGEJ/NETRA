@@ -20,7 +20,26 @@ const COUNTRY_COORDS: Record<string, { lat: number; lng: number }> = {
   말레이시아: { lat: 3.1390, lng: 101.6869 },
   아일랜드: { lat: 53.3498, lng: -6.2603 },
   인도: { lat: 28.6139, lng: 77.2090 },
+  대만: { lat: 25.0330, lng: 121.5654 },
+  덴마크: { lat: 55.6761, lng: 12.5683 },
+  독일: { lat: 52.5200, lng: 13.4050 },
+  멕시코: { lat: 19.4326, lng: -99.1332 },
+  브라질: { lat: -15.7939, lng: -47.8828 },
+  스웨덴: { lat: 59.3293, lng: 18.0686 },
+  스페인: { lat: 40.4168, lng: -3.7038 },
+  아이슬란드: { lat: 64.1466, lng: -21.9426 },
+  이탈리아: { lat: 41.9028, lng: 12.4964 },
+  칠레: { lat: -33.4489, lng: -70.6693 },
+  캐나다: { lat: 45.4215, lng: -75.6972 },
+  코스타리카: { lat: 9.9281, lng: -84.0907 },
+  프랑스: { lat: 48.8566, lng: 2.3522 },
+  핀란드: { lat: 60.1699, lng: 24.9384 },
+  필리핀: { lat: 14.5995, lng: 120.9842 },
 };
+
+// 원문 국가명에 붙은 부연 설명을 떼고 좌표 테이블의 키로 맞춘다.
+// (예: '아이슬란드(대체 작동 사이트, 기본 저장 사이트에 오류가 발생하는 경우 이용됨)' -> '아이슬란드')
+const normalizeCountry = (name: string) => name.replace(/\s*[(（].*$/, '').trim();
 
 // arc 고도를 두 지점 사이 각거리(라디안)에 비례해 정하되 상한을 둔다.
 // 단거리(국내·인접국)는 최소 0.08로 봉긋하게 띄워 보이게 하고,
@@ -52,6 +71,7 @@ export default function App() {
   const [temuRaw, setTemuRaw] = useState<any>(null);
   const [naverRaw, setNaverRaw] = useState<any>(null);
   const [coupangRaw, setCoupangRaw] = useState<any>(null);
+  const [netflixRaw, setNetflixRaw] = useState<any>(null);
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
   useEffect(() => {
@@ -105,6 +125,14 @@ export default function App() {
       .then((res) => res.json())
       .then(setCoupangRaw)
       .catch(() => setCoupangRaw(null));
+  }, []);
+
+  // pipeline/extract_netflix.py 로 한국 이용자 대상 위탁·국외이전 표에서 뽑아낸 데이터
+  useEffect(() => {
+    fetch('/data/netflix.json')
+      .then((res) => res.json())
+      .then(setNetflixRaw)
+      .catch(() => setNetflixRaw(null));
   }, []);
 
   const globeMaterial = useMemo(() => {
@@ -362,7 +390,66 @@ export default function App() {
     };
   }, [coupangRaw]);
 
-  const networkServices = [kakaomobilityService, temuService, naverService, coupangService].filter(Boolean);
+  // 실제 처리방침 표(data/services/netflix.json)에서 뽑은 넷플릭스 서비스 노드
+  // 한 수탁사가 여러 국가로 이전하는 경우가 많아(예: Google reCaptcha 9개국),
+  // 국가별로 몇 개 수신처가 그 나라를 거치는지 집계해서 노드로 띄운다.
+  const netflixService = useMemo(() => {
+    if (!netflixRaw) return null;
+
+    const meNode = { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' };
+    const collectorNode = { id: 'netflix-hq', name: '넷플릭스', lat: 36.2, lng: 122.5, altitude: 0.2, logo: 'N', color: '#E50914' };
+    const consignmentNode = {
+      id: 'netflix-consignment', name: `국내 수탁사 ${netflixRaw.consignment.length}곳`,
+      lat: 32.5, lng: 120.0, altitude: 0.35, logo: '🏢', color: '#64748b'
+    };
+
+    const overseasCounts = new Map<string, number>();
+    for (const t of netflixRaw.overseasTransfer) {
+      for (const raw of t.countries) {
+        const country = normalizeCountry(raw);
+        if (!COUNTRY_COORDS[country]) continue;
+        overseasCounts.set(country, (overseasCounts.get(country) || 0) + 1);
+      }
+    }
+
+    const overseasPalette = ['#ef4444', '#f59e0b', '#8b5cf6', '#06b6d4', '#10b981', '#ec4899'];
+    const overseasNodes = Array.from(overseasCounts.entries()).map(([country, count], idx) => {
+      const base = COUNTRY_COORDS[country];
+      return {
+        id: `netflix-overseas-${idx}`, name: `${country} (${count}건)`,
+        lat: base.lat, lng: base.lng, altitude: 0.4,
+        logo: '🌐', color: overseasPalette[idx % overseasPalette.length],
+      };
+    });
+
+    const nodes = [meNode, collectorNode, consignmentNode, ...overseasNodes];
+    const arcs = [
+      { startLat: meNode.lat, startLng: meNode.lng, endLat: collectorNode.lat, endLng: collectorNode.lng, color: '#E50914' },
+      { startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: consignmentNode.lat, endLng: consignmentNode.lng, color: '#64748b' },
+      ...overseasNodes.map((n: any) => ({
+        startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: n.lat, endLng: n.lng, color: n.color,
+      })),
+    ];
+
+    const chain = [
+      { node: '나', type: '정보주체', desc: '계정·시청기록·결제정보·디바이스 정보 등' },
+      { node: '넷플릭스', type: '1차 수집', desc: `국외이전 ${netflixRaw.overseasTransfer.length}건 · ${overseasCounts.size}개국 공시` },
+      { node: consignmentNode.name, type: '위탁', desc: netflixRaw.consignment.map((c: any) => `${c.consignee}(${c.task})`).join(', ') },
+      ...netflixRaw.overseasTransfer.map((t: any) => ({
+        node: `${t.recipient} (${t.countries.length}개국)`,
+        type: t.transferType === '제3자 제공' ? '국외 제3자 제공' : '국외이전',
+        desc: `${t.purposeAndItems} · ${t.countries.map(normalizeCountry).join(', ')}`,
+      })),
+    ];
+
+    return {
+      id: 'netflix', name: 'netflix.com', korName: '넷플릭스', logo: 'N', color: '#E50914',
+      date: `${netflixRaw.service.retrievedAt} 수집`, lastUse: '원문 참고 (policyUrl)', retention: '목적 달성에 필요한 기간', risk: '높음',
+      nodes, arcs, chain,
+    };
+  }, [netflixRaw]);
+
+  const networkServices = [kakaomobilityService, temuService, naverService, coupangService, netflixService].filter(Boolean);
 
   // 메인 화면에 띄울 기본 아이콘들 ('나'를 중심으로 개인정보가 각 서비스로 흘러나가는 모습)
   const activeElements = selectedService ? selectedService.nodes : [
@@ -372,7 +459,8 @@ export default function App() {
     { id: 'temu', name: '테무', lat: 45.0, lng: 140.0, altitude: 0.25, logo: '🛒', color: '#FF6600' },
     { id: 'cloud', name: '클라우드', lat: 15.0, lng: 135.0, altitude: 0.35, logo: '☁️', color: '#0284c7' },
     { id: 'kakaomobility', name: '카카오모빌리티', lat: 33.5, lng: 128.5, altitude: 0.4, logo: 'K', color: '#000000' },
-    { id: 'coupang', name: '쿠팡', lat: 30.0, lng: 122.0, altitude: 0.3, logo: 'C', color: '#E52528' }
+    { id: 'coupang', name: '쿠팡', lat: 30.0, lng: 122.0, altitude: 0.3, logo: 'C', color: '#E52528' },
+    { id: 'netflix', name: '넷플릭스', lat: 41.0, lng: 118.0, altitude: 0.35, logo: 'N', color: '#E50914' }
   ];
 
   // 기본 상태의 arc는 '나'로부터 각 서비스로 개인정보가 흘러나가는 방향을 표현 (dash 애니메이션이 흐름 방향을 보여줌)
