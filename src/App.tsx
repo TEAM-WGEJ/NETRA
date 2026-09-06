@@ -35,6 +35,14 @@ const COUNTRY_COORDS: Record<string, { lat: number; lng: number }> = {
   프랑스: { lat: 48.8566, lng: 2.3522 },
   핀란드: { lat: 60.1699, lng: 24.9384 },
   필리핀: { lat: 14.5995, lng: 120.9842 },
+  아르헨티나: { lat: -34.6037, lng: -58.3816 },
+  페루: { lat: -12.0464, lng: -77.0428 },
+  콜롬비아: { lat: 4.7110, lng: -74.0721 },
+  포르투갈: { lat: 38.7223, lng: -9.1393 },
+  알제리: { lat: 36.7538, lng: 3.0588 },
+  아랍에미리트: { lat: 25.2048, lng: 55.2708 },
+  인도네시아: { lat: -6.2088, lng: 106.8456 },
+  홍콩: { lat: 22.3193, lng: 114.1694 },
 };
 
 // 원문 국가명에 붙은 부연 설명을 떼고 좌표 테이블의 키로 맞춘다.
@@ -73,6 +81,7 @@ export default function App() {
   const [coupangRaw, setCoupangRaw] = useState<any>(null);
   const [netflixRaw, setNetflixRaw] = useState<any>(null);
   const [googleRaw, setGoogleRaw] = useState<any>(null);
+  const [metaRaw, setMetaRaw] = useState<any>(null);
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
   useEffect(() => {
@@ -142,6 +151,14 @@ export default function App() {
       .then((res) => res.json())
       .then(setGoogleRaw)
       .catch(() => setGoogleRaw(null));
+  }, []);
+
+  // pipeline/extract_meta.py 로 '대한민국 개인정보 보호 고지사항' 스냅샷에서 뽑아낸 데이터
+  useEffect(() => {
+    fetch('/data/meta.json')
+      .then((res) => res.json())
+      .then(setMetaRaw)
+      .catch(() => setMetaRaw(null));
   }, []);
 
   const globeMaterial = useMemo(() => {
@@ -523,7 +540,74 @@ export default function App() {
 
   // filter(Boolean)만으로는 TS가 null을 걸러낸 걸 알지 못해 아래 find(s => s.id ...)에서
   // 's' is possibly 'null' 이 난다. 타입 가드로 좁혀 준다.
-  const networkServices = [kakaomobilityService, temuService, naverService, coupangService, netflixService, googleService]
+  // 실제 고지사항 스냅샷(data/services/meta.json)에서 뽑은 메타(인스타그램·페이스북) 서비스 노드
+  // 메타는 이전받는 자의 '이름만' 공시하고 국가를 한 건도 밝히지 않는다. 따라서 지구본에
+  // 띄우는 국가 노드는 공시가 아니라 회사명에서 추정한 값이며, 라벨에 '추정'을 붙여
+  // 다른 서비스의 공시 기반 노드와 구분한다. 추정조차 불가능한 곳은 집계 노드로만 표현한다.
+  const metaService = useMemo(() => {
+    if (!metaRaw) return null;
+
+    const meNode = { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' };
+    const collectorNode = { id: 'meta-hq', name: '메타', lat: 34.5, lng: 126.0, altitude: 0.2, logo: 'M', color: '#0866FF' };
+
+    const inferredCounts = new Map<string, number>();
+    let unknownCount = 0;
+    for (const t of metaRaw.overseasTransfer) {
+      const c = t.inferredCountry;
+      if (c && COUNTRY_COORDS[c]) inferredCounts.set(c, (inferredCounts.get(c) || 0) + 1);
+      else unknownCount += 1;
+    }
+
+    const unknownNode = {
+      id: 'meta-unknown', name: `국가 추정 불가 ${unknownCount}곳`,
+      lat: 30.5, lng: 124.0, altitude: 0.35, logo: '❓', color: '#64748b',
+    };
+
+    const palette = ['#ef4444', '#f59e0b', '#8b5cf6', '#06b6d4', '#10b981', '#ec4899'];
+    const inferredNodes = Array.from(inferredCounts.entries()).map(([country, count], idx) => {
+      const base = COUNTRY_COORDS[country];
+      return {
+        id: `meta-inferred-${idx}`, name: `${country} (추정 ${count}건)`,
+        lat: base.lat, lng: base.lng, altitude: 0.4,
+        logo: '🌐', color: palette[idx % palette.length],
+      };
+    });
+
+    const nodes = [meNode, collectorNode, unknownNode, ...inferredNodes];
+    const arcs = [
+      { startLat: meNode.lat, startLng: meNode.lng, endLat: collectorNode.lat, endLng: collectorNode.lng, color: '#0866FF' },
+      { startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: unknownNode.lat, endLng: unknownNode.lng, color: '#64748b' },
+      ...inferredNodes.map((n: any) => ({
+        startLat: collectorNode.lat, startLng: collectorNode.lng, endLat: n.lat, endLng: n.lng, color: n.color,
+      })),
+    ];
+
+    const aiPartners = metaRaw.overseasTransfer.filter((t: any) => t.transferType === 'AI 파트너 제공');
+    const chain = [
+      { node: '나', type: '정보주체', desc: '계정·게시물·활동기록·기기정보 등 (인스타그램·페이스북·메신저 공통)' },
+      { node: '메타', type: '1차 수집', desc: `이전처 ${metaRaw.overseasTransfer.length}곳 공시 · 이전 국가 공시 0건` },
+      { node: unknownNode.name, type: '국가 미공시', desc: '원문에 국가가 없고 회사명으로도 소재지를 추정할 수 없는 이전처' },
+      ...aiPartners.map((t: any) => ({
+        node: t.recipient, type: 'AI 파트너 제공', desc: t.purposeAndItems,
+      })),
+      ...metaRaw.overseasTransfer
+        .filter((t: any) => t.transferType !== 'AI 파트너 제공')
+        .map((t: any) => ({
+          node: t.inferredCountry ? `${t.recipient} (${t.inferredCountry} 추정)` : t.recipient,
+          type: t.inferredCountry ? '국외 이전처 (국가 추정)' : '국외 이전처 (국가 미공시)',
+          desc: t.purposeAndItems,
+        })),
+    ];
+
+    return {
+      id: 'meta', name: 'instagram.com · facebook.com', korName: '메타 (인스타그램)', logo: 'M', color: '#0866FF',
+      date: `${metaRaw.service.retrievedAt} 수집 (방침 ${metaRaw.service.policyEffectiveDate} 시행)`,
+      lastUse: '원문 참고 (policyUrl)', retention: '삭제 요청 후 90일 이내 파기 (백업 90일 추가)', risk: '높음',
+      nodes, arcs, chain,
+    };
+  }, [metaRaw]);
+
+  const networkServices = [kakaomobilityService, temuService, naverService, coupangService, netflixService, googleService, metaService]
     .filter((s): s is NonNullable<typeof s> => s !== null);
 
   // 메인 화면에 띄울 기본 아이콘들 ('나'를 중심으로 개인정보가 각 서비스로 흘러나가는 모습)
@@ -536,7 +620,8 @@ export default function App() {
     { id: 'kakaomobility', name: '카카오모빌리티', lat: 33.5, lng: 128.5, altitude: 0.4, logo: 'K', color: '#000000' },
     { id: 'coupang', name: '쿠팡', lat: 30.0, lng: 122.0, altitude: 0.3, logo: 'C', color: '#E52528' },
     { id: 'netflix', name: '넷플릭스', lat: 41.0, lng: 118.0, altitude: 0.35, logo: 'N', color: '#E50914' },
-    { id: 'google', name: '구글', lat: 22.0, lng: 124.0, altitude: 0.3, logo: 'G', color: '#4285F4' }
+    { id: 'google', name: '구글', lat: 22.0, lng: 124.0, altitude: 0.3, logo: 'G', color: '#4285F4' },
+    { id: 'meta', name: '메타 (인스타그램)', lat: 28.0, lng: 113.0, altitude: 0.35, logo: 'M', color: '#0866FF' }
   ];
 
   // 기본 상태의 arc는 '나'로부터 각 서비스로 개인정보가 흘러나가는 방향을 표현 (dash 애니메이션이 흐름 방향을 보여줌)
