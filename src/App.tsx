@@ -43,6 +43,39 @@ const COUNTRY_COORDS: Record<string, { lat: number; lng: number }> = {
   아랍에미리트: { lat: 25.2048, lng: 55.2708 },
   인도네시아: { lat: -6.2088, lng: 106.8456 },
   홍콩: { lat: 22.3193, lng: 114.1694 },
+  한국: { lat: 37.5665, lng: 126.9780 },
+};
+
+// 각 서비스 운영 기업의 본사 소재국.
+// 처리방침에 적힌 내용이 아니라 공개된 기업 정보를 바탕으로 우리가 붙인 편집 정보이므로,
+// 공시 데이터(data/services/*.json)에 섞지 않고 화면 배치용으로만 여기에 둔다.
+// 쿠팡·네이버·카카오·카카오모빌리티는 처리방침상 개인정보처리자가 국내 법인이다.
+// 테무는 운영사 PDD Holdings의 본사 소재지(더블린) 기준이며 원문에 명시된 값이 아니다.
+const SERVICE_HQ_COUNTRY: Record<string, string> = {
+  naver: '한국',
+  kakao: '한국',
+  kakaomobility: '한국',
+  coupang: '한국',
+  netflix: '미국',
+  google: '미국',
+  meta: '미국',
+  temu: '아일랜드',
+};
+
+// 같은 나라에 본사가 여럿이면 지구본 위에서 완전히 겹치므로 국가 중심 좌표 주위로 흩어 놓는다.
+// 표시상의 분산일 뿐 실제 소재지 좌표가 아니다.
+const hqRingPosition = (country: string, index: number, total: number) => {
+  const base = COUNTRY_COORDS[country] ?? { lat: 0, lng: 0 };
+  if (total <= 1) return base;
+  const angle = (2 * Math.PI * index) / total;
+  return { lat: base.lat + Math.sin(angle) * 5, lng: base.lng + Math.cos(angle) * 8 };
+};
+
+// 서비스 상세 화면의 수집 기업 노드도 본사 소재국에 놓되,
+// 같은 나라로 향하는 국외이전 노드와 겹치지 않도록 경도를 조금 띄운다.
+const hqNodePosition = (serviceId: string) => {
+  const base = COUNTRY_COORDS[SERVICE_HQ_COUNTRY[serviceId] ?? '한국'] ?? { lat: 0, lng: 0 };
+  return { lat: base.lat, lng: base.lng + 4 };
 };
 
 // 원문 국가명에 붙은 부연 설명을 떼고 좌표 테이블의 키로 맞춘다.
@@ -198,7 +231,7 @@ export default function App() {
     if (!kakaomobilityRaw) return null;
 
     const meNode = { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' };
-    const collectorNode = { id: 'kakaomobility-hq', name: '카카오모빌리티', lat: 37.5, lng: 129.5, altitude: 0.2, logo: 'K', color: '#000000' };
+    const collectorNode = { id: 'kakaomobility-hq', name: '카카오모빌리티', ...hqNodePosition('kakaomobility'), altitude: 0.2, logo: 'K', color: '#000000' };
     const consignmentNode = {
       id: 'kakaomobility-consignment', name: `국내 수탁사 ${kakaomobilityRaw.consignment.length}곳`,
       lat: 34.5, lng: 132.0, altitude: 0.35, logo: '🏢', color: '#64748b'
@@ -247,7 +280,7 @@ export default function App() {
     if (!temuRaw) return null;
 
     const meNode = { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' };
-    const collectorNode = { id: 'temu-hq', name: 'Temu', lat: 36.0, lng: 130.0, altitude: 0.2, logo: 'T', color: '#FF6600' };
+    const collectorNode = { id: 'temu-hq', name: 'Temu', ...hqNodePosition('temu'), altitude: 0.2, logo: 'T', color: '#FF6600' };
 
     const allRecipients = temuRaw.consignmentAndOverseasTransfer.flatMap((c: any) =>
       c.recipients.map((r: any) => ({ ...r, category: c.category }))
@@ -313,7 +346,7 @@ export default function App() {
     if (!naverRaw) return null;
 
     const meNode = { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' };
-    const collectorNode = { id: 'naver-hq', name: '네이버', lat: 37.6, lng: 127.8, altitude: 0.2, logo: 'N', color: '#03C75A' };
+    const collectorNode = { id: 'naver-hq', name: '네이버', ...hqNodePosition('naver'), altitude: 0.2, logo: 'N', color: '#03C75A' };
     const consignmentNode = {
       id: 'naver-consignment', name: `국내 위탁 ${naverRaw.consignment.length}곳`,
       lat: 35.0, lng: 130.5, altitude: 0.3, logo: '🏢', color: '#64748b',
@@ -378,7 +411,7 @@ export default function App() {
     if (!coupangRaw) return null;
 
     const meNode = { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' };
-    const collectorNode = { id: 'coupang-hq', name: '쿠팡', lat: 36.8, lng: 125.0, altitude: 0.2, logo: 'C', color: '#E52528' };
+    const collectorNode = { id: 'coupang-hq', name: '쿠팡', ...hqNodePosition('coupang'), altitude: 0.2, logo: 'C', color: '#E52528' };
     const consignmentNode = {
       id: 'coupang-consignment', name: `국내 수탁사 ${coupangRaw.consignment.length}개 업무`,
       lat: 33.5, lng: 124.0, altitude: 0.35, logo: '🏢', color: '#64748b'
@@ -433,7 +466,7 @@ export default function App() {
     if (!netflixRaw) return null;
 
     const meNode = { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' };
-    const collectorNode = { id: 'netflix-hq', name: '넷플릭스', lat: 36.2, lng: 122.5, altitude: 0.2, logo: 'N', color: '#E50914' };
+    const collectorNode = { id: 'netflix-hq', name: '넷플릭스', ...hqNodePosition('netflix'), altitude: 0.2, logo: 'N', color: '#E50914' };
     const consignmentNode = {
       id: 'netflix-consignment', name: `국내 수탁사 ${netflixRaw.consignment.length}곳`,
       lat: 32.5, lng: 120.0, altitude: 0.35, logo: '🏢', color: '#64748b'
@@ -492,7 +525,7 @@ export default function App() {
     if (!googleRaw) return null;
 
     const meNode = { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' };
-    const collectorNode = { id: 'google-hq', name: '구글', lat: 38.5, lng: 121.0, altitude: 0.2, logo: 'G', color: '#4285F4' };
+    const collectorNode = { id: 'google-hq', name: '구글', ...hqNodePosition('google'), altitude: 0.2, logo: 'G', color: '#4285F4' };
     const domesticCount = googleRaw.consignment.filter((c: any) => c.countries.length === 0).length;
     const consignmentNode = {
       id: 'google-consignment', name: `국가 미표기 위탁사 ${domesticCount}곳`,
@@ -558,7 +591,7 @@ export default function App() {
     if (!metaRaw) return null;
 
     const meNode = { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' };
-    const collectorNode = { id: 'meta-hq', name: '메타', lat: 34.5, lng: 126.0, altitude: 0.2, logo: 'M', color: '#0866FF' };
+    const collectorNode = { id: 'meta-hq', name: '메타', ...hqNodePosition('meta'), altitude: 0.2, logo: 'M', color: '#0866FF' };
 
     const inferredCounts = new Map<string, number>();
     let unknownCount = 0;
@@ -625,7 +658,7 @@ export default function App() {
     if (!kakaoRaw) return null;
 
     const meNode = { id: 'me', name: '나', lat: 37.5, lng: 127.0, altitude: 0.05, logo: '👤', color: '#3b82f6' };
-    const collectorNode = { id: 'kakao-hq', name: '카카오', lat: 39.5, lng: 130.5, altitude: 0.2, logo: '카', color: '#3C1E1E' };
+    const collectorNode = { id: 'kakao-hq', name: '카카오', ...hqNodePosition('kakao'), altitude: 0.2, logo: '카', color: '#3C1E1E' };
     const consignmentNode = {
       id: 'kakao-consignment', name: `국내 수탁 ${kakaoRaw.consignment.length}개 업무`,
       lat: 42.5, lng: 133.0, altitude: 0.35, logo: '🏢', color: '#64748b',
@@ -697,20 +730,42 @@ export default function App() {
   const networkServices = [kakaomobilityService, temuService, naverService, coupangService, netflixService, googleService, metaService, kakaoService]
     .filter((s): s is NonNullable<typeof s> => s !== null);
 
-  // 메인 화면에 띄울 기본 아이콘들 ('나'를 중심으로 개인정보가 각 서비스로 흘러나가는 모습)
-  const activeElements = selectedService ? selectedService.nodes : [
-    { id: 'me', name: '나', lat: 36.5, lng: 127.5, altitude: 0.05, logo: '👤', color: '#3b82f6' },
-    { id: 'naver', name: '네이버', lat: 37.5, lng: 129.0, altitude: 0.2, logo: 'N', color: '#03C75A' },
-    { id: 'insta', name: '인스타그램', lat: 25.0, lng: 110.0, altitude: 0.3, logo: '📷', color: '#E1306C' },
-    { id: 'temu', name: '테무', lat: 45.0, lng: 140.0, altitude: 0.25, logo: '🛒', color: '#FF6600' },
-    { id: 'cloud', name: '클라우드', lat: 15.0, lng: 135.0, altitude: 0.35, logo: '☁️', color: '#0284c7' },
-    { id: 'kakaomobility', name: '카카오모빌리티', lat: 33.5, lng: 128.5, altitude: 0.4, logo: 'K', color: '#000000' },
-    { id: 'coupang', name: '쿠팡', lat: 30.0, lng: 122.0, altitude: 0.3, logo: 'C', color: '#E52528' },
-    { id: 'netflix', name: '넷플릭스', lat: 41.0, lng: 118.0, altitude: 0.35, logo: 'N', color: '#E50914' },
-    { id: 'google', name: '구글', lat: 22.0, lng: 124.0, altitude: 0.3, logo: 'G', color: '#4285F4' },
-    { id: 'meta', name: '메타 (인스타그램)', lat: 28.0, lng: 113.0, altitude: 0.35, logo: 'M', color: '#0866FF' },
-    { id: 'kakao', name: '카카오', lat: 40.0, lng: 133.0, altitude: 0.3, logo: '카', color: '#3C1E1E' }
+  // 좌하단 요약 카드에 쓸 실제 집계.
+  // 원문이 공시한 '경로'의 수이지 실제로 전송된 건수가 아니므로 라벨도 '공시된'으로 쓴다.
+  const loadedRaw = [kakaomobilityRaw, temuRaw, naverRaw, coupangRaw, netflixRaw, googleRaw, metaRaw, kakaoRaw].filter(Boolean);
+  const countOf = (raw: any, key: string) => (Array.isArray(raw?.[key]) ? raw[key].length : 0);
+  const disclosedRouteCount = loadedRaw.reduce(
+    (sum: number, raw: any) =>
+      sum + countOf(raw, 'consignment') + countOf(raw, 'thirdPartyProvision') +
+      countOf(raw, 'overseasTransfer') + countOf(raw, 'consignmentAndOverseasTransfer') +
+      countOf(raw, 'thirdPartyReceipt'),
+    0,
+  );
+  const overseasRouteCount = loadedRaw.reduce(
+    (sum: number, raw: any) => sum + countOf(raw, 'overseasTransfer') + countOf(raw, 'consignmentAndOverseasTransfer'),
+    0,
+  );
+
+  // 메인 화면 아이콘은 실제 연동된 서비스 목록에서 만든다.
+  // 각 기업은 본사 소재국(SERVICE_HQ_COUNTRY)에 찍고, 같은 나라면 그 주위로 흩어 놓는다.
+  const hqCountsByCountry = new Map<string, string[]>();
+  for (const svc of networkServices) {
+    const country = SERVICE_HQ_COUNTRY[svc.id] ?? '한국';
+    hqCountsByCountry.set(country, [...(hqCountsByCountry.get(country) ?? []), svc.id]);
+  }
+  const defaultElements = [
+    { id: 'me', name: '나', ...COUNTRY_COORDS['한국'], altitude: 0.05, logo: '👤', color: '#3b82f6' },
+    ...networkServices.map((svc: any) => {
+      const country = SERVICE_HQ_COUNTRY[svc.id] ?? '한국';
+      const peers = hqCountsByCountry.get(country) ?? [svc.id];
+      return {
+        id: svc.id, name: svc.korName, logo: svc.logo, color: svc.color, altitude: 0.25,
+        ...hqRingPosition(country, peers.indexOf(svc.id), peers.length),
+      };
+    }),
   ];
+
+  const activeElements = selectedService ? selectedService.nodes : defaultElements;
 
   // 기본 상태의 arc는 '나'로부터 각 서비스로 개인정보가 흘러나가는 방향을 표현 (dash 애니메이션이 흐름 방향을 보여줌)
   const meNode = activeElements.find((n: any) => n.id === 'me');
@@ -742,42 +797,23 @@ export default function App() {
 
       {/* 좌측 하단 요약 카드 (시안 하단 스타일) */}
       <div style={{
-        position: 'absolute', bottom: '90px', left: '32px', zIndex: 10, pointerEvents: 'none',
+        position: 'absolute', bottom: '32px', left: '32px', zIndex: 10, pointerEvents: 'none',
         background: '#ffffff', padding: '16px 24px', borderRadius: '20px',
         boxShadow: '0 10px 30px rgba(0,0,0,0.08)', display: 'flex', gap: '24px', border: '1px solid #e2e8f0'
       }}>
         <div>
-          <p style={{ margin: '0 0 4px 0', fontSize: '11px', color: '#64748b', fontWeight: 'bold' }}>연결된 서비스</p>
-          <p style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>27 개</p>
+          <p style={{ margin: '0 0 4px 0', fontSize: '11px', color: '#64748b', fontWeight: 'bold' }}>연동된 서비스</p>
+          <p style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>{networkServices.length} 개</p>
         </div>
         <div style={{ width: '1px', background: '#e2e8f0' }} />
         <div>
-          <p style={{ margin: '0 0 4px 0', fontSize: '11px', color: '#64748b', fontWeight: 'bold' }}>전송 중인 정보</p>
-          <p style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#2563eb' }}>142 건</p>
+          <p style={{ margin: '0 0 4px 0', fontSize: '11px', color: '#64748b', fontWeight: 'bold' }}>공시된 이전·제공 경로</p>
+          <p style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#2563eb' }}>{disclosedRouteCount} 건</p>
         </div>
-      </div>
-
-      {/* 하단 네비게이션 바 (시안 하단 탭 스타일) */}
-      <div style={{
-        position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 10,
-        background: '#ffffff', padding: '10px 30px', borderRadius: '35px',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.08)', display: 'flex', gap: '40px', border: '1px solid #e2e8f0', alignItems: 'center'
-      }}>
-        <div onClick={() => setSelectedService(null)} style={{ textAlign: 'center', cursor: 'pointer', color: selectedService ? '#94a3b8' : '#2563eb' }}>
-          <div style={{ fontSize: '16px' }}>🌍</div>
-          <span style={{ fontSize: '10px', fontWeight: 'bold' }}>지구본</span>
-        </div>
-        <div style={{ textAlign: 'center', cursor: 'pointer', color: '#94a3b8' }}>
-          <div style={{ fontSize: '16px' }}>🔗</div>
-          <span style={{ fontSize: '10px', fontWeight: 'bold' }}>관계망</span>
-        </div>
-        <div style={{ textAlign: 'center', cursor: 'pointer', color: '#94a3b8' }}>
-          <div style={{ fontSize: '16px' }}>📊</div>
-          <span style={{ fontSize: '10px', fontWeight: 'bold' }}>정보 흐름</span>
-        </div>
-        <div style={{ textAlign: 'center', cursor: 'pointer', color: '#94a3b8' }}>
-          <div style={{ fontSize: '16px' }}>👤</div>
-          <span style={{ fontSize: '10px', fontWeight: 'bold' }}>내 활동</span>
+        <div style={{ width: '1px', background: '#e2e8f0' }} />
+        <div>
+          <p style={{ margin: '0 0 4px 0', fontSize: '11px', color: '#64748b', fontWeight: 'bold' }}>이 중 국외이전</p>
+          <p style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#dc2626' }}>{overseasRouteCount} 건</p>
         </div>
       </div>
 
@@ -873,9 +909,9 @@ export default function App() {
         arcAltitude={arcAltitudeByDistance}
       />
 
-      {/* 지구본 우측 줌/리셋 컨트롤 */}
+      {/* 지구본 좌측 줌/리셋 컨트롤 (우측은 상세 패널이 덮으므로 왼쪽에 둔다) */}
       <div style={{
-        position: 'absolute', top: '50%', right: '24px', transform: 'translateY(-50%)', zIndex: 10,
+        position: 'absolute', top: '50%', left: '24px', transform: 'translateY(-50%)', zIndex: 10,
         display: 'flex', flexDirection: 'column', gap: '10px'
       }}>
         <button onClick={() => handleZoom(-0.4)} style={iconButtonStyle}><Plus size={16} color="#334155" /></button>
@@ -905,14 +941,6 @@ export default function App() {
                 </div>
               </div>
               <button onClick={() => setSelectedService(null)} style={{ background: '#f1f5f9', border: 'none', width: '32px', height: '32px', borderRadius: '50%', fontSize: '14px', cursor: 'pointer', color: '#64748b', fontWeight: 'bold' }}>✕</button>
-            </div>
-
-            {/* 탭 메뉴 (개요 / 전송 정보 / 관계 서비스) */}
-            <div style={{ display: 'flex', gap: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px', marginBottom: '20px', fontSize: '13px', fontWeight: 'bold' }}>
-              <span style={{ color: '#2563eb', borderBottom: '2px solid #2563eb', paddingBottom: '12px', marginBottom: '-13px' }}>개요</span>
-              <span style={{ color: '#94a3b8', cursor: 'pointer' }}>전송 정보</span>
-              <span style={{ color: '#94a3b8', cursor: 'pointer' }}>관계 서비스</span>
-              <span style={{ color: '#94a3b8', cursor: 'pointer' }}>내 활동</span>
             </div>
 
             {/* 서비스 정보 박스 */}
